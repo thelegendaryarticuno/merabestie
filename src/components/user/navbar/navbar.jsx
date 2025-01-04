@@ -167,12 +167,12 @@ const ProfessionalNavbar = () => {
   return (
     <nav
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-        scrolled ? "bg-white shadow-md" : "bg-transparent"
+        scrolled ? "bg-black shadow-md" : "bg-transparent"
       }`}
     >
       {/* Top Promotional Banner */}
       <div
-        className={`bg-pink-600 text-white py-2 text-center text-xs transition-all duration-300 ${
+        className={`bg-red-600 text-white py-2 text-center text-xs transition-all duration-300 ${
           scrolled ? "opacity-0 h-0 overflow-hidden" : "opacity-100 h-auto"
         }`}
       >
@@ -186,13 +186,13 @@ const ProfessionalNavbar = () => {
       </div>
 
       {/* Main Navigation */}
-      <div className="bg-white border-b">
+      <div className="bg-black border-b border-gray-800">
         <div className="max-w-[1200px] mx-auto px-4 lg:px-0">
           <div className="h-[70px] flex items-center justify-between">
             {/* Mobile Menu Toggle */}
             <button
               onClick={toggleMenu}
-              className="lg:hidden text-black hover:text-pink-600 transition"
+              className="lg:hidden text-white hover:text-red-600 transition"
             >
               <RiMenu3Line className="w-6 h-6" />
             </button>
@@ -202,8 +202,8 @@ const ProfessionalNavbar = () => {
               to="/HomePage"
               className="text-2xl flex items-center hover:opacity-80 transition mx-auto lg:mx-0"
             >
-              <span className="font-['Bodoni_MT'] font-bold text-3xl sm:text-4xl text-pink-600">
-                MERA Bestie
+              <span className="font-['Bodoni_MT'] font-bold text-3xl sm:text-4xl text-green-600">
+                URBAN EDGE
               </span>
             </Link>
 
@@ -215,8 +215,8 @@ const ProfessionalNavbar = () => {
                   to={path}
                   className={`px-4 py-2 mx-2 flex items-center ${
                     isActive(path)
-                      ? "text-pink-600"
-                      : "text-gray-800 hover:text-pink-600"
+                      ? "text-red-600"
+                      : "text-white hover:text-red-600"
                   } transition-colors duration-200`}
                 >
                   <Icon className="w-5 h-5 mr-2" />
@@ -228,7 +228,7 @@ const ProfessionalNavbar = () => {
             {/* Action Icons */}
             <div className="flex items-center space-x-6">
               <button
-                className="text-gray-800 hover:text-pink-600 transition"
+                className="text-white hover:text-red-600 transition"
                 onClick={toggleSearch}
               >
                 <RiSearchLine className="w-5 h-5" />
@@ -236,12 +236,12 @@ const ProfessionalNavbar = () => {
 
               <Link
                 to="/cart"
-                className="relative text-gray-800 hover:text-pink-600 transition flex items-center"
+                className="relative text-white hover:text-red-600 transition flex items-center"
               >
                 <RiShoppingCart2Line className="w-5 h-5" />
                 <span className="ml-2 hidden md:block">Cart</span>
                 {cartItemCount > 0 && (
-                  <span className="absolute top-[-8px] right-[-8px] bg-pink-600 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center">
+                  <span className="absolute top-[-8px] right-[-8px] bg-red-600 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center">
                     {cartItemCount}
                   </span>
                 )}
@@ -250,7 +250,7 @@ const ProfessionalNavbar = () => {
               <div className="relative">
                 <button
                   onClick={toggleProfileMenu}
-                  className="flex items-center text-gray-800 hover:text-pink-600 transition"
+                  className="flex items-center text-white hover:text-red-600 transition"
                 >
                   <RiUser3Line className="w-5 h-5" />
                   <span className="ml-2 hidden md:block">
@@ -263,20 +263,20 @@ const ProfessionalNavbar = () => {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg overflow-hidden z-50"
+                    className="absolute right-0 mt-2 w-48 bg-black border border-gray-800 rounded-lg shadow-lg overflow-hidden z-50"
                   >
                     {userId ? (
                       <>
                         <Link
                           to="/orders"
-                          className="flex items-center px-4 py-2 hover:bg-pink-50 transition"
+                          className="flex items-center px-4 py-2 hover:bg-gray-800 transition text-white"
                         >
                           <RiFileList3Line className="w-4 h-4 mr-2" />
                           My Orders
                         </Link>
                         <button
                           onClick={handleLogout}
-                          className="w-full text-left flex items-center px-4 py-2 hover:bg-pink-50 transition"
+                          className="w-full text-left flex items-center px-4 py-2 hover:bg-gray-800 transition text-white"
                         >
                           <RiLogoutBoxRLine className="w-4 h-4 mr-2" />
                           Logout
@@ -286,21 +286,21 @@ const ProfessionalNavbar = () => {
                       <>
                         <Link
                           to="/login"
-                          className="flex items-center px-4 py-2 hover:bg-pink-50 transition"
+                          className="flex items-center px-4 py-2 hover:bg-gray-800 transition text-white"
                         >
                           <RiLoginBoxLine className="w-4 h-4 mr-2" />
                           Login
                         </Link>
                         <Link
                           to="/Signup"
-                          className="flex items-center px-4 py-2 hover:bg-pink-50 transition"
+                          className="flex items-center px-4 py-2 hover:bg-gray-800 transition text-white"
                         >
                           <RiUserAddLine className="w-4 h-4 mr-2" />
                           Sign Up
                         </Link>
                         <Link
                           to='/seller/login'
-                          className="flex items-center px-4 py-2 hover:bg-pink-50 transition"
+                          className="flex items-center px-4 py-2 hover:bg-gray-800 transition text-white"
                         >
                           <RiStore2Line className="w-4 h-4 mr-2" />
                           Seller
@@ -323,17 +323,17 @@ const ProfessionalNavbar = () => {
             animate="open"
             exit="closed"
             variants={menuVariants}
-            className="lg:hidden fixed inset-y-0 left-0 w-64 z-50 bg-white shadow-xl"
+            className="lg:hidden fixed inset-y-0 left-0 w-64 z-50 bg-black shadow-xl"
           >
-            <div className="flex justify-between items-center p-4 border-b">
-              <span className="font-['Bodoni_MT'] text-2xl font-bold text-pink-600">
+            <div className="flex justify-between items-center p-4 border-b border-gray-800">
+              <span className="font-['Bodoni_MT'] text-2xl font-bold text-red-600">
                 Menu
               </span>
               <motion.button
                 whileHover={{ rotate: 90 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setIsMenuOpen(false)}
-                className="text-gray-800"
+                className="text-white"
               >
                 <RiCloseLine className="w-6 h-6" />
               </motion.button>
@@ -352,8 +352,8 @@ const ProfessionalNavbar = () => {
                     to={path}
                     className={`flex items-center px-6 py-3 ${
                       isActive(path)
-                        ? "text-pink-600 bg-pink-50"
-                        : "text-gray-800 hover:bg-pink-50 hover:text-pink-600"
+                        ? "text-red-600 bg-gray-900"
+                        : "text-white hover:bg-gray-800 hover:text-red-600"
                     } transition-colors duration-200`}
                     onClick={() => setIsMenuOpen(false)}
                   >
@@ -362,10 +362,10 @@ const ProfessionalNavbar = () => {
                   </Link>
                 </motion.div>
               ))}
-              <div className="border-t mt-4 pt-4">
+              <div className="border-t border-gray-800 mt-4 pt-4">
                 <Link
                   to="/cart"
-                  className="flex items-center px-6 py-3 text-gray-800 hover:bg-pink-50 hover:text-pink-600 transition-colors duration-200"
+                  className="flex items-center px-6 py-3 text-white hover:bg-gray-800 hover:text-red-600 transition-colors duration-200"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <RiShoppingCart2Line className="w-5 h-5 mr-3" />
@@ -390,13 +390,13 @@ const ProfessionalNavbar = () => {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white p-4 rounded-lg w-full max-w-md mx-4"
+              className="bg-black p-4 rounded-lg w-full max-w-md mx-4 border border-gray-800"
               ref={searchRef}
             >
               <SearchBar />
               <button 
                 onClick={toggleSearch}
-                className="mt-2 text-gray-600 hover:text-pink-600 flex items-center justify-center w-full"
+                className="mt-2 text-gray-400 hover:text-red-600 flex items-center justify-center w-full"
               >
                 <RiCloseLine className="w-4 h-4 mr-2" />
                 Close

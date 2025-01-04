@@ -52,11 +52,11 @@ const ContactUs = () => {
   return (
     <>
     <Helmet>
-      <title>Contact Us | Mera Bestie</title>
-      <meta name="description" content="Get in touch with Mera Bestie. We're here to help and answer any questions you may have." />
+      <title>Contact Us | Urban Edge</title>
+      <meta name="description" content="Get in touch with Urban Edge. We're here to help and answer any questions you may have." />
     </Helmet>
     <Navbar className='z-0 mb-auto' />
-    <div className="bg-gradient-to-br from-pink-50 to-blue-50 min-h-screen mt-16">
+    <div className="bg-black min-h-screen mt-16 text-white">
       
       <div className="container mx-auto px-4 py-16">
         {showSuccess && (
@@ -64,16 +64,16 @@ const ContactUs = () => {
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
-            className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30"
+            className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-70"
           >
             <motion.div 
-              className="bg-white p-10 rounded-2xl shadow-2xl text-center max-w-md"
+              className="bg-gray-900 p-10 rounded-2xl shadow-2xl text-center max-w-md"
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
               <motion.div 
-                className="w-32 h-32 mx-auto mb-6 text-green-500"
+                className="w-32 h-32 mx-auto mb-6 text-red-500"
                 animate={{ 
                   scale: [1, 1.1, 1],
                   rotate: [0, 10, -10, 0]
@@ -89,9 +89,9 @@ const ContactUs = () => {
                   />
                 </svg>
               </motion.div>
-              <h3 className="text-3xl font-bold text-green-600 mb-4">Thank You!</h3>
-              <p className="text-gray-700 mb-2">Your message has been received.</p>
-              <p className="text-gray-600 text-sm">We'll get back to you soon.</p>
+              <h3 className="text-3xl font-bold text-red-500 mb-4">Thank You!</h3>
+              <p className="text-gray-300 mb-2">Your message has been received.</p>
+              <p className="text-gray-400 text-sm">We'll get back to you soon.</p>
             </motion.div>
           </motion.div>
         )}
@@ -102,10 +102,10 @@ const ContactUs = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h1 className="text-5xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600">
+          <h1 className="text-5xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-800">
             Contact Us
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
             We're here to help and answer any questions you may have. 
             Reach out and let's start a conversation.
           </p>
@@ -117,46 +117,46 @@ const ContactUs = () => {
             initial={{ x: -50, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="bg-white rounded-3xl p-8 shadow-2xl"
+            className="bg-gray-900 rounded-3xl p-8 shadow-2xl"
           >
             <div className="flex items-center mb-6">
-              <FaPaperPlane className="text-pink-500 mr-4 text-3xl" />
-              <h2 className="text-3xl font-bold text-gray-800">Send a Message</h2>
+              <FaPaperPlane className="text-red-500 mr-4 text-3xl" />
+              <h2 className="text-3xl font-bold text-white">Send a Message</h2>
             </div>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-gray-700 font-medium mb-2">Name</label>
+                <label className="block text-gray-300 font-medium mb-2">Name</label>
                 <input
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-300"
+                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-300 text-white"
                   placeholder="Your Name"
                 />
               </div>
               <div>
-                <label className="block text-gray-700 font-medium mb-2">Email</label>
+                <label className="block text-gray-300 font-medium mb-2">Email</label>
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-300"
+                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-300 text-white"
                   placeholder="you@example.com"
                 />
               </div>
               <div>
-                <label className="block text-gray-700 font-medium mb-2">Message</label>
+                <label className="block text-gray-300 font-medium mb-2">Message</label>
                 <textarea
                   name="message"
                   value={formData.message}
                   onChange={handleChange}
                   required
                   rows="4"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all duration-300"
+                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-300 text-white"
                   placeholder="Your message here..."
                 ></textarea>
               </div>
@@ -164,7 +164,7 @@ const ContactUs = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 type="submit"
-                className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white py-4 rounded-xl font-semibold hover:from-pink-600 hover:to-purple-700 transition-all duration-300 shadow-lg"
+                className="w-full bg-gradient-to-r from-red-600 to-red-800 text-white py-4 rounded-xl font-semibold hover:from-red-700 hover:to-red-900 transition-all duration-300 shadow-lg"
               >
                 Send Message
               </motion.button>
@@ -176,42 +176,42 @@ const ContactUs = () => {
             initial={{ x: 50, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="bg-white rounded-3xl p-8 shadow-2xl flex flex-col justify-between"
+            className="bg-gray-900 rounded-3xl p-8 shadow-2xl flex flex-col justify-between"
           >
             <div>
               <div className="flex items-center mb-6">
-                <FaMapMarkerAlt className="text-pink-500 mr-4 text-3xl" />
-                <h2 className="text-3xl font-bold text-gray-800">Our Location</h2>
+                <FaMapMarkerAlt className="text-red-500 mr-4 text-3xl" />
+                <h2 className="text-3xl font-bold text-white">Our Location</h2>
               </div>
               <div className="space-y-6 mb-8">
                 {[
                   { 
-                    icon: <FaPhone className="text-pink-500 text-2xl" />, 
+                    icon: <FaPhone className="text-red-500 text-2xl" />, 
                     title: "Phone", 
                     detail: "+1 (555) 123-4567" 
                   },
                   { 
-                    icon: <FaEnvelope className="text-pink-500 text-2xl" />, 
+                    icon: <FaEnvelope className="text-red-500 text-2xl" />, 
                     title: "Email", 
-                    detail: "support@merabestie.com" 
+                    detail: "support@urbanedge.com" 
                   },
                   { 
-                    icon: <FaMapMarkerAlt className="text-pink-500 text-2xl" />, 
+                    icon: <FaMapMarkerAlt className="text-red-500 text-2xl" />, 
                     title: "Address", 
-                    detail: "123 Gift Street, Creative Quarter, NY 10001" 
+                    detail: "123 Fashion Avenue, Trendy City, NY 10001" 
                   }
                 ].map((contact, index) => (
                   <motion.div 
                     key={index}
                     whileHover={{ scale: 1.05 }}
-                    className="flex items-center space-x-4 bg-pink-50 p-4 rounded-xl"
+                    className="flex items-center space-x-4 bg-gray-800 p-4 rounded-xl"
                   >
-                    <div className="p-3 bg-white rounded-full shadow-md">
+                    <div className="p-3 bg-gray-700 rounded-full shadow-md">
                       {contact.icon}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-800">{contact.title}</h3>
-                      <p className="text-gray-600">{contact.detail}</p>
+                      <h3 className="font-semibold text-white">{contact.title}</h3>
+                      <p className="text-gray-300">{contact.detail}</p>
                     </div>
                   </motion.div>
                 ))}
@@ -238,10 +238,10 @@ const ContactUs = () => {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="text-center mt-16 max-w-3xl mx-auto"
         >
-          <h2 className="text-4xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600">
+          <h2 className="text-4xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-800">
             Let's Create Something Amazing Together
           </h2>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-gray-300">
             Whether you have a question, feedback, or just want to say hello, 
             we're always excited to hear from you. Your thoughts matter to us.
           </p>

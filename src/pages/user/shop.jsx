@@ -6,7 +6,6 @@ import { Helmet } from 'react-helmet';
 import Navbar from '../../components/user/navbar/navbar';
 
 const Shop = ({ category }) => {
-  // State declarations
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loadMore, setLoadMore] = useState(6);
   const [products, setProducts] = useState([]);
@@ -28,7 +27,6 @@ const Shop = ({ category }) => {
   const { categoryName } = useParams();
   const navigate = useNavigate();
 
-  // Effects and functions
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -102,8 +100,8 @@ const Shop = ({ category }) => {
 
   if (selectedCategory === '404') {
     return (
-      <div className="flex justify-center items-center h-screen bg-white">
-        <h1 className="text-4xl font-bold text-gray-900">404 Not Found</h1>
+      <div className="flex justify-center items-center h-screen bg-gray-900 text-white">
+        <h1 className="text-4xl font-bold">404 Not Found</h1>
       </div>
     );
   }
@@ -111,7 +109,7 @@ const Shop = ({ category }) => {
   const ProductCard = ({ product }) => {
     return (
       <motion.div
-        className={`bg-white rounded-xl shadow-sm overflow-hidden transform transition-all duration-300 hover:shadow-lg relative group ${layout === 'list' ? 'flex flex-col sm:flex-row' : ''}`}
+        className={`bg-gray-900 rounded-xl shadow-sm overflow-hidden transform transition-all duration-300 hover:shadow-lg relative group ${layout === 'list' ? 'flex flex-col sm:flex-row' : ''}`}
         whileHover={{ y: -5 }}
         onMouseEnter={() => setHoveredProduct(product.productId)}
         onMouseLeave={() => setHoveredProduct(null)}
@@ -123,11 +121,11 @@ const Shop = ({ category }) => {
               alt={product.name}
               className="w-full h-64 object-cover object-center transform transition-transform duration-300 group-hover:scale-105"
             />
-            <div className="absolute top-3 right-3 bg-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute top-3 right-3 bg-gray-800 p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
               <FaHeart className="text-gray-400 hover:text-red-500 cursor-pointer" />
             </div>
             {product.discount && (
-              <div className="absolute top-3 left-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+              <div className="absolute top-3 left-3 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-medium">
                 -{product.discount}%
               </div>
             )}
@@ -137,19 +135,19 @@ const Shop = ({ category }) => {
           <div className="flex items-center mb-2">
             <div className="flex text-yellow-400 text-sm">
               {[...Array(5)].map((_, i) => (
-                <FaStar key={i} className={i < Math.floor(product.rating || 4) ? 'text-yellow-400' : 'text-gray-300'} />
+                <FaStar key={i} className={i < Math.floor(product.rating || 4) ? 'text-yellow-400' : 'text-gray-600'} />
               ))}
             </div>
-            <span className="text-gray-500 text-sm ml-2">({product.reviews || 42})</span>
+            <span className="text-gray-400 text-sm ml-2">({product.reviews || 42})</span>
           </div>
-          <h4 className="font-medium text-gray-800 text-lg mb-1 truncate">
+          <h4 className="font-medium text-white text-lg mb-1 truncate">
             {product.name}
           </h4>
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-gray-900 font-bold text-lg">₹{product.price}</span>
+              <span className="text-white font-bold text-lg">₹{product.price}</span>
               {product.originalPrice && (
-                <span className="text-gray-400 line-through text-sm ml-2">₹{product.originalPrice}</span>
+                <span className="text-gray-500 line-through text-sm ml-2">₹{product.originalPrice}</span>
               )}
             </div>
           </div>
@@ -161,10 +159,10 @@ const Shop = ({ category }) => {
   return (
     <>
       <Helmet>
-        <title>Shop | Mera Bestie</title>
+        <title>Shop | Urban Edge</title>
       </Helmet>
 
-      <div className="bg-gradient-to-r from-indigo-500 via-pink-500 to-pink-500 text-white">
+      <div className="bg-gradient-to-r from-red-600 to-red-800 text-white">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <p className="text-sm sm:text-base font-medium text-center animate-pulse">
             USE CODE OFF10 TO GET FLAT 10% OFF ON ORDERS ABOVE ₹499 | FREE SHIPPING | COD AVAILABLE
@@ -172,18 +170,18 @@ const Shop = ({ category }) => {
         </div>
       </div>
 
-      <div className="bg-gray-50 min-h-screen pt-8">
-        <Navbar className="sticky top-0 z-50 bg-white shadow-sm" />
+      <div className="bg-black min-h-screen pt-8 text-white">
+        <Navbar className="sticky top-0 z-50 bg-gray-900 shadow-sm" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">Today's Best Deals For You!</h1>
+            <h1 className="text-3xl font-bold text-white mb-6">Today's Best Deals For You!</h1>
             
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div className="w-full sm:w-auto">
                 <button
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  className="w-full sm:hidden px-4 py-2 bg-black text-white rounded-full mb-4"
+                  className="w-full sm:hidden px-4 py-2 bg-red-600 text-white rounded-full mb-4"
                 >
                   {isMobileMenuOpen ? 'Close Categories' : 'Show Categories'}
                 </button>
@@ -191,7 +189,7 @@ const Shop = ({ category }) => {
                   <button
                     onClick={() => filterProducts('all')}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                      selectedCategory === 'all' ? 'bg-black text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+                      selectedCategory === 'all' ? 'bg-red-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
                     }`}
                   >
                     All
@@ -202,8 +200,8 @@ const Shop = ({ category }) => {
                       onClick={() => filterProducts(cat.name)}
                       className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                         selectedCategory === cat.name
-                          ? 'bg-black text-white'
-                          : 'bg-white text-gray-700 hover:bg-gray-100'
+                          ? 'bg-red-600 text-white'
+                          : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
                       }`}
                     >
                       {cat.name}
@@ -216,20 +214,20 @@ const Shop = ({ category }) => {
                 <select
                   value={sortOption}
                   onChange={(e) => setSortOption(e.target.value)}
-                  className="w-full sm:w-auto px-4 py-2 bg-white border border-gray-300 rounded-full text-sm font-medium"
+                  className="w-full sm:w-auto px-4 py-2 bg-gray-800 border border-gray-700 rounded-full text-sm font-medium text-white"
                 >
                   <option value="default">Sort By: Featured</option>
                   <option value="price-asc">Price: Low to High</option>
                   <option value="price-desc">Price: High to Low</option>
                   <option value="rating">Best Rating</option>
                 </select>
-                <div className="flex gap-2 bg-white border border-gray-300 rounded-full p-1">
+                <div className="flex gap-2 bg-gray-800 border border-gray-700 rounded-full p-1">
                   <button 
                     onClick={() => setLayout('grid')} 
                     className={`p-2 rounded-full transition-colors ${
                       layout === 'grid' 
-                        ? 'bg-black text-white' 
-                        : 'text-gray-500 hover:bg-gray-100'
+                        ? 'bg-red-600 text-white' 
+                        : 'text-gray-400 hover:bg-gray-700'
                     }`}
                   >
                     <FaThLarge size={16} />
@@ -238,8 +236,8 @@ const Shop = ({ category }) => {
                     onClick={() => setLayout('list')} 
                     className={`p-2 rounded-full transition-colors ${
                       layout === 'list' 
-                        ? 'bg-black text-white' 
-                        : 'text-gray-500 hover:bg-gray-100'
+                        ? 'bg-red-600 text-white' 
+                        : 'text-gray-400 hover:bg-gray-700'
                     }`}
                   >
                     <FaList size={16} />
@@ -269,7 +267,7 @@ const Shop = ({ category }) => {
             <div className="text-center mt-8">
               <button
                 onClick={() => setLoadMore(prev => prev + 6)}
-                className="px-6 py-2 bg-black text-white rounded-full hover:bg-gray-800 transition-colors"
+                className="px-6 py-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
               >
                 Load More
               </button>
@@ -282,4 +280,3 @@ const Shop = ({ category }) => {
 };
 
 export default Shop;
-
