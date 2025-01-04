@@ -16,28 +16,13 @@ const Shop = ({ category }) => {
   const [sortOption, setSortOption] = useState('default');
   const [layout, setLayout] = useState('grid');
   const [hoveredProduct, setHoveredProduct] = useState(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const categories = [
-    { 
-      name: 'Fashion Accessories', 
-      img: 'https://cdn.igp.com/f_auto,q_auto,t_pnopt12prodlp/products/p-modish-fashion-necklace-25631-m.jpg',
-      description: 'Trendy accessories for every occasion'
-    },
-    { 
-      name: 'Books', 
-      img: "https://tse2.mm.bing.net/th?id=OIP.uyi1Q5l2H8Zf9APJQplJfQHaEK&pid=Api&P=0&h=180",
-      description: 'Discover your next favorite read'
-    },
-    { 
-      name: 'Gift Boxes', 
-      img: "http://images4.fanpop.com/image/photos/22200000/Christmas-gifts-christmas-gifts-22231235-2048-2048.jpg",
-      description: 'Perfect presents for loved ones'
-    },
-    { 
-      name: 'Stationery', 
-      img: "https://tse1.mm.bing.net/th?id=OIP.UCpcTmMMOdXTF6WAhtD94QHaH0&pid=Api&P=0&h=180",
-      description: 'Quality supplies for work and study'
-    },
+    { name: 'Fashion', img: 'https://cdn.igp.com/f_auto,q_auto,t_pnopt12prodlp/products/p-modish-fashion-necklace-25631-m.jpg', description: 'Trendy accessories for every occasion' },
+    { name: 'Gift Items', img: "http://images4.fanpop.com/image/photos/22200000/Christmas-gifts-christmas-gifts-22231235-2048-2048.jpg", description: 'Perfect presents for your loved ones' },
+    { name: 'Greeting Cards', img: "https://tse2.mm.bing.net/th?id=OIP.uyi1Q5l2H8Zf9APJQplJfQHaEK&pid=Api&P=0&h=180", description: 'Express your feelings with our cards' },
+    { name: 'Stationery', img: 'https://image.shutterstock.com/image-photo/image-250nw-1350723956.jpg', description: 'High-quality stationery for all your needs' }
   ];
 
   const { categoryName } = useParams();
@@ -96,6 +81,7 @@ const Shop = ({ category }) => {
       setFilteredProducts(filtered);
     }
     setLoadMore(6);
+    setIsMobileMenuOpen(false);
   };
 
   const sortProducts = (option) => {
@@ -106,8 +92,6 @@ const Shop = ({ category }) => {
       sortedProducts.sort((a, b) => b.price - a.price);
     } else if (option === 'rating') {
       sortedProducts.sort((a, b) => b.rating - a.rating);
-    } else if (option === 'category') {
-      sortedProducts.sort((a, b) => a.category.localeCompare(b.category));
     }
     setFilteredProducts(sortedProducts);
   };
@@ -127,12 +111,12 @@ const Shop = ({ category }) => {
   const ProductCard = ({ product }) => {
     return (
       <motion.div
-        className={`bg-white rounded-xl shadow-sm overflow-hidden transform transition-all duration-300 hover:shadow-lg relative group ${layout === 'list' ? 'flex' : 'grid'}`}
+        className={`bg-white rounded-xl shadow-sm overflow-hidden transform transition-all duration-300 hover:shadow-lg relative group ${layout === 'list' ? 'flex flex-col sm:flex-row' : ''}`}
         whileHover={{ y: -5 }}
         onMouseEnter={() => setHoveredProduct(product.productId)}
         onMouseLeave={() => setHoveredProduct(null)}
       >
-        <Link to={`/${product.productId}`} className="block">
+        <Link to={`/${product.productId}`} className={`block ${layout === 'list' ? 'sm:w-1/3' : 'w-full'}`}>
           <div className="relative">
             <img 
               src={product.img} 
@@ -148,29 +132,28 @@ const Shop = ({ category }) => {
               </div>
             )}
           </div>
-          <div className="p-4">
-            <div className="flex items-center mb-2">
-              <div className="flex text-yellow-400 text-sm">
-                {[...Array(5)].map((_, i) => (
-                  <FaStar key={i} className={i < Math.floor(product.rating || 4) ? 'text-yellow-400' : 'text-gray-300'} />
-                ))}
-              </div>
-              <span className="text-gray-500 text-sm ml-2">({product.reviews || 42})</span>
+        </Link>
+        <div className={`p-4 ${layout === 'list' ? 'sm:w-2/3' : 'w-full'}`}>
+          <div className="flex items-center mb-2">
+            <div className="flex text-yellow-400 text-sm">
+              {[...Array(5)].map((_, i) => (
+                <FaStar key={i} className={i < Math.floor(product.rating || 4) ? 'text-yellow-400' : 'text-gray-300'} />
+              ))}
             </div>
-            <h4 className="font-medium text-gray-800 text-lg mb-1 truncate">
-              {product.name}
-            </h4>
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-gray-900 font-bold text-lg">₹{product.price}</span>
-                {product.originalPrice && (
-                  <span className="text-gray-400 line-through text-sm ml-2">₹{product.originalPrice}</span>
-                )}
-              </div>
-             
+            <span className="text-gray-500 text-sm ml-2">({product.reviews || 42})</span>
+          </div>
+          <h4 className="font-medium text-gray-800 text-lg mb-1 truncate">
+            {product.name}
+          </h4>
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-gray-900 font-bold text-lg">₹{product.price}</span>
+              {product.originalPrice && (
+                <span className="text-gray-400 line-through text-sm ml-2">₹{product.originalPrice}</span>
+              )}
             </div>
           </div>
-        </Link>
+        </div>
       </motion.div>
     );
   };
@@ -181,7 +164,6 @@ const Shop = ({ category }) => {
         <title>Shop | Mera Bestie</title>
       </Helmet>
 
-      {/* Promotional Banner */}
       <div className="bg-gradient-to-r from-indigo-500 via-pink-500 to-pink-500 text-white">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <p className="text-sm sm:text-base font-medium text-center animate-pulse">
@@ -193,105 +175,111 @@ const Shop = ({ category }) => {
       <div className="bg-gray-50 min-h-screen pt-8">
         <Navbar className="sticky top-0 z-50 bg-white shadow-sm" />
 
-        {/* Sorting and Layout Options */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0 bg-white p-4 rounded-lg shadow-sm">
-            <div className="flex items-center space-x-4">
-              <select
-                value={sortOption}
-                onChange={(e) => setSortOption(e.target.value)}
-                className="border border-gray-200 p-2 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none"
-              >
-                <option value="default">Sort By</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="rating">Best Rating</option>
-                <option value="category">Category</option>
-              </select>
-            </div>
-            <div className="flex items-center space-x-2">
-              <button 
-                onClick={() => setLayout('grid')} 
-                className={`p-2 rounded-lg transition-colors ${layout === 'grid' ? 'bg-gray-100 text-pink-600' : 'text-gray-500 hover:bg-gray-100'}`}
-              >
-                <FaThLarge size={20} />
-              </button>
-              <button 
-                onClick={() => setLayout('list')} 
-                className={`p-2 rounded-lg transition-colors ${layout === 'list' ? 'bg-gray-100 text-pink-600' : 'text-gray-500 hover:bg-gray-100'}`}
-              >
-                <FaList size={20} />
-              </button>
-            </div>
-          </div>
-        </div>
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-6">Today's Best Deals For You!</h1>
+            
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div className="w-full sm:w-auto">
+                <button
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  className="w-full sm:hidden px-4 py-2 bg-black text-white rounded-full mb-4"
+                >
+                  {isMobileMenuOpen ? 'Close Categories' : 'Show Categories'}
+                </button>
+                <div className={`flex flex-wrap items-center gap-3 ${isMobileMenuOpen ? 'block' : 'hidden'} sm:flex`}>
+                  <button
+                    onClick={() => filterProducts('all')}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                      selectedCategory === 'all' ? 'bg-black text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    All
+                  </button>
+                  {categories.map((cat) => (
+                    <button
+                      key={cat.name}
+                      onClick={() => filterProducts(cat.name)}
+                      className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                        selectedCategory === cat.name
+                          ? 'bg-black text-white'
+                          : 'bg-white text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      {cat.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-        {/* Products Section */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className={layout === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" : "flex flex-col gap-6"}>
-            {filteredProducts.slice(0, loadMore).map((product) => (
-              <ProductCard key={product.productId} product={product} />
-            ))}
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <select
+                  value={sortOption}
+                  onChange={(e) => setSortOption(e.target.value)}
+                  className="w-full sm:w-auto px-4 py-2 bg-white border border-gray-300 rounded-full text-sm font-medium"
+                >
+                  <option value="default">Sort By: Featured</option>
+                  <option value="price-asc">Price: Low to High</option>
+                  <option value="price-desc">Price: High to Low</option>
+                  <option value="rating">Best Rating</option>
+                </select>
+                <div className="flex gap-2 bg-white border border-gray-300 rounded-full p-1">
+                  <button 
+                    onClick={() => setLayout('grid')} 
+                    className={`p-2 rounded-full transition-colors ${
+                      layout === 'grid' 
+                        ? 'bg-black text-white' 
+                        : 'text-gray-500 hover:bg-gray-100'
+                    }`}
+                  >
+                    <FaThLarge size={16} />
+                  </button>
+                  <button 
+                    onClick={() => setLayout('list')} 
+                    className={`p-2 rounded-full transition-colors ${
+                      layout === 'list' 
+                        ? 'bg-black text-white' 
+                        : 'text-gray-500 hover:bg-gray-100'
+                    }`}
+                  >
+                    <FaList size={16} />
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
+
+          <div className={`grid gap-6 ${
+            layout === 'grid'
+              ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+              : 'grid-cols-1'
+          }`}>
+            {loading ? (
+              <div className="col-span-full text-center">
+                <p>Loading...</p>
+              </div>
+            ) : (
+              filteredProducts.slice(0, loadMore).map(product => (
+                <ProductCard key={product.productId} product={product} />
+              ))
+            )}
+          </div>
+
           {filteredProducts.length > loadMore && (
-            <div className="text-center mt-12">
+            <div className="text-center mt-8">
               <button
                 onClick={() => setLoadMore(prev => prev + 6)}
-                className="bg-pink-600 text-white px-8 py-3 rounded-lg hover:bg-pink-700 transition-colors font-medium"
+                className="px-6 py-2 bg-black text-white rounded-full hover:bg-gray-800 transition-colors"
               >
                 Load More
               </button>
             </div>
           )}
-        </section>
-
-        {/* Best Sellers Section */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-8">
-            Best Sellers
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {bestSellers.map((product) => (
-              <ProductCard key={product.productId} product={product} />
-            ))}
-          </div>
-        </section>
-
-        {/* Footer */}
-        <footer className="bg-white border-t border-gray-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-              <div className="text-center md:text-left">
-                <h4 className="text-2xl font-bold text-gray-900 mb-4">MERA Bestie</h4>
-                <p className="text-gray-600 mb-6 leading-relaxed">
-                  Your one-stop destination for thoughtful and unique gifts that make every moment special.
-                </p>
-                <div className="flex justify-center md:justify-start space-x-6">
-                  <a href="https://facebook.com" className="text-gray-400 hover:text-pink-600 transition-colors">
-                    <FaFacebook size={24} />
-                  </a>
-                  <a href="https://instagram.com" className="text-gray-400 hover:text-pink-600 transition-colors">
-                    <FaInstagram size={24} />
-                  </a>
-                  <a href="https://twitter.com" className="text-gray-400 hover:text-pink-600 transition-colors">
-                    <FaTwitter size={24} />
-                  </a>
-                </div>
-              </div>
-              <div className="text-center md:text-right">
-                <h5 className="text-xl font-bold text-gray-900 mb-4">Contact Us</h5>
-                <p className="text-gray-600 leading-relaxed">
-                  3181 Street Name, City, India<br />
-                  Email: support@merabestie.com<br />
-                  Phone: +91 1234567890
-                </p>
-              </div>
-            </div>
-          </div>
-        </footer>
+        </div>
       </div>
     </>
   );
 };
 
 export default Shop;
+
