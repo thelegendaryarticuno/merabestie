@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Edit } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet';
 import Sidebar from '../../components/admin/sidebar';
@@ -14,8 +14,12 @@ const CouponPage = () => {
   const [error, setError] = useState('');
   const [couponData, setCouponData] = useState({
     code: '',
-    discountPercentage: ''
+    name: '',
+    expirationDate: '',
+    discountPercentage: '',
+    status: 'Active' // Default status
   });
+  const [isEditing, setIsEditing] = useState(false); // Track if we are editing an existing coupon
 
   useEffect(() => {
     const verifySeller = async () => {
@@ -77,20 +81,30 @@ const CouponPage = () => {
 
   const handleCreateCoupon = () => {
     generateCouponCode();
+    setIsEditing(false); // Reset editing flag for new coupon
     setShowDialog(true);
   };
 
-  const handleDeleteCoupon = async (code, discountPercentage) => {
+  const handleEditCoupon = (coupon) => {
+    setCouponData({
+      code: coupon.code,
+      name: coupon.name,
+      expirationDate: coupon.expirationDate,
+      discountPercentage: coupon.discountPercentage,
+      status: coupon.status
+    });
+    setIsEditing(true);
+    setShowDialog(true);
+  };
+
+  const handleDeleteCoupon = async (code) => {
     try {
       const response = await fetch('https://ecommercebackend-8gx8.onrender.com/coupon/delete-coupon', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          code,
-          discountPercentage
-        })
+        body: JSON.stringify({ code })
       });
 
       if (response.ok) {
@@ -105,13 +119,17 @@ const CouponPage = () => {
   };
 
   const handleSaveCoupon = async () => {
-    if (!couponData.code || !couponData.discountPercentage) {
+    if (!couponData.code || !couponData.discountPercentage || !couponData.name || !couponData.expirationDate) {
       setError('Please fill all fields');
       return;
     }
 
     try {
-      const response = await fetch('https://ecommercebackend-8gx8.onrender.com/coupon/save-coupon', {
+      const endpoint = isEditing 
+        ? 'https://ecommercebackend-8gx8.onrender.com/coupon/update-coupon'
+        : 'https://ecommercebackend-8gx8.onrender.com/coupon/save-coupon';
+      
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -124,7 +142,10 @@ const CouponPage = () => {
         fetchCoupons();
         setCouponData({
           code: '',
-          discountPercentage: ''
+          name: '',
+          expirationDate: '',
+          discountPercentage: '',
+          status: 'Active'
         });
       } else {
         setError('Failed to save coupon');
@@ -175,17 +196,25 @@ const CouponPage = () => {
                     className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow relative"
                   >
                     <button 
-                      onClick={() => handleDeleteCoupon(coupon.code, coupon.discountPercentage)}
+                      onClick={() => handleDeleteCoupon(coupon.code)}
                       className="absolute top-2 right-2 p-2 text-gray-400 hover:text-red-500 transition-colors"
                     >
                       <Trash2 size={20} />
                     </button>
+                    <button
+                      onClick={() => handleEditCoupon(coupon)}
+                      className="absolute top-2 left-2 p-2 text-gray-400 hover:text-blue-500 transition-colors"
+                    >
+                      <Edit size={20} />
+                    </button>
                     <div className="flex flex-col h-full">
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">{coupon.code}</h3>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">{coupon.name}</h3>
+                      <h4 className="text-sm text-gray-500">{coupon.code}</h4>
                       <div className="flex items-center mt-auto">
                         <span className="text-3xl font-bold text-pink-600">{coupon.discountPercentage}%</span>
                         <span className="ml-2 text-gray-600">OFF</span>
                       </div>
+                      <div className="text-sm text-gray-500">{coupon.status} - Expires: {coupon.expirationDate}</div>
                     </div>
                   </motion.div>
                 ))}
@@ -199,8 +228,26 @@ const CouponPage = () => {
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                 >
-                  <h2 className="text-xl font-bold mb-4">Create New Coupon</h2>
+                  <h2 className="text-xl font-bold mb-4">{isEditing ? 'Edit Coupon' : 'Create New Coupon'}</h2>
                   <div className="space-y-4">
+                    <div>
+                      <label className="block text-gray-700 mb-2">Coupon Name</label>
+                      <input
+                        type="text"
+                        value={couponData.name}
+                        onChange={(e) => setCouponData({ ...couponData, name: e.target.value })}
+                        className="w-full p-2 border border-gray-300 rounded-lg bg-gray-50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-700 mb-2">Expiration Date</label>
+                      <input
+                        type="date"
+                        value={couponData.expirationDate}
+                        onChange={(e) => setCouponData({ ...couponData, expirationDate: e.target.value })}
+                        className="w-full p-2 border border-gray-300 rounded-lg"
+                      />
+                    </div>
                     <div>
                       <label className="block text-gray-700 mb-2">Coupon Code</label>
                       <input
@@ -220,6 +267,17 @@ const CouponPage = () => {
                         onChange={(e) => setCouponData({ ...couponData, discountPercentage: e.target.value })}
                         className="w-full p-2 border border-gray-300 rounded-lg"
                       />
+                    </div>
+                    <div>
+                      <label className="block text-gray-700 mb-2">Status</label>
+                      <select
+                        value={couponData.status}
+                        onChange={(e) => setCouponData({ ...couponData, status: e.target.value })}
+                        className="w-full p-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="Active">Active</option>
+                        <option value="Expired">Expired</option>
+                      </select>
                     </div>
                     <div className="flex justify-end gap-4 mt-6">
                       <button
