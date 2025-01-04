@@ -250,7 +250,7 @@ const CartItems = () => {
                     <p className="text-sm text-gray-500">{item.description}</p>
                   </div>
                   <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-4 w-full mt-4 md:mt-0">
-                    <span className="font-medium text-base">Rs. {item.price}</span>
+                    <span className="font-medium text-base">₹{item.price}</span>
                     
                     <div className="flex items-center border rounded-md">
                       <button 
@@ -273,9 +273,7 @@ const CartItems = () => {
                       </button>
                     </div>
                     
-                    <span className="font-medium text-base">
-                      Rs. {(parseFloat(item.price.replace(/[^\d.]/g, '')) * (item.quantity || 1)).toFixed(2)}
-                    </span>
+                  
                     
                     <button 
                       onClick={() => handleRemoveItem(item._id)}
@@ -321,25 +319,25 @@ const CartItems = () => {
           <div className="space-y-2 text-sm">
             <div className="flex flex-col md:flex-row justify-between">
               <span>Subtotal</span>
-              <span>Rs. {cartItems.reduce((total, item) => 
+              <span>₹{cartItems.reduce((total, item) => 
                 total + (parseFloat(item.price.replace(/[^\d.]/g, '')) * (item.quantity || 1)), 
                 0).toFixed(2)}</span>
             </div>
             {discountInfo.percentage > 0 && (
               <div className="flex flex-col md:flex-row justify-between text-green-600">
                 <span>Discount ({discountInfo.percentage}%)</span>
-                <span>- Rs. {(cartItems.reduce((total, item) => 
+                <span>- ₹{(cartItems.reduce((total, item) => 
                   total + (parseFloat(item.price.replace(/[^\d.]/g, '')) * (item.quantity || 1)), 
                   0) * (discountInfo.percentage / 100)).toFixed(2)}</span>
               </div>
             )}
             <div className="flex flex-col md:flex-row justify-between">
               <span>Shipping</span>
-              <span>Rs. 0.00</span>
+              <span>₹ 0.00</span>
             </div>
             <div className="flex flex-col md:flex-row justify-between font-bold text-base">
               <span>Total</span>
-              <span>Rs. {calculateTotal()}</span>
+              <span>₹ {calculateTotal()}</span>
             </div>
           </div>
           
