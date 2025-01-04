@@ -209,16 +209,17 @@ const ProfessionalNavbar = () => {
 
             {/* Desktop Navigation Links */}
             <div className="hidden lg:flex items-center justify-center absolute left-1/2 transform -translate-x-1/2">
-              {navLinks.map(({ path, name }) => (
+              {navLinks.map(({ path, name, icon: Icon }) => (
                 <Link
                   key={path}
                   to={path}
-                  className={`px-4 py-2 mx-2 ${
+                  className={`px-4 py-2 mx-2 flex items-center ${
                     isActive(path)
                       ? "text-pink-600"
                       : "text-gray-800 hover:text-pink-600"
                   } transition-colors duration-200`}
                 >
+                  <Icon className="w-5 h-5 mr-2" />
                   {name}
                 </Link>
               ))}
