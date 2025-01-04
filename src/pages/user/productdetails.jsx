@@ -22,6 +22,7 @@ const ProductDetail = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(''); // Added state for selected image
   const [quantity, setQuantity] = useState(1);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [showAddAnimation, setShowAddAnimation] = useState(false);
@@ -62,7 +63,10 @@ const ProductDetail = () => {
         });
         const data = await response.json();
         if (data.success) {
-          setProduct(data.product);
+          // Duplicate the same image multiple times
+          const images = Array(3).fill(data.product.img);
+          setProduct({ ...data.product, images });
+          setSelectedImage(images[0]); // Initialize with first image
           calculateStockStatus(data.product);
           fetchRelatedProducts(data.product.category);
           updateRecentlyViewed(data.product);
@@ -176,7 +180,6 @@ const ProductDetail = () => {
     }
   };
   
-  
 
   const handleWriteReview = () => {
     setShowReviewDialog(true);
@@ -198,6 +201,19 @@ const ProductDetail = () => {
     setRating(1);
     setReviewText('');
     toast.success('Review submitted successfully');
+  };
+
+  // Added handlers for image navigation
+  const handlePreviousImage = () => {
+    const currentIndex = product.images.indexOf(selectedImage);
+    const prevIndex = (currentIndex - 1 + product.images.length) % product.images.length;
+    setSelectedImage(product.images[prevIndex]);
+  };
+
+  const handleNextImage = () => {
+    const currentIndex = product.images.indexOf(selectedImage);
+    const nextIndex = (currentIndex + 1) % product.images.length;
+    setSelectedImage(product.images[nextIndex]);
   };
 
   if (!product) {
@@ -234,18 +250,49 @@ const ProductDetail = () => {
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
               {/* Product Image Section */}
-              <div className="p-8 bg-gray-50 flex items-center justify-center">
+              <div className="p-8 bg-gray-50 flex flex-col items-center">
                 <motion.div 
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 300 }}
                   className="w-full max-w-md h-[500px] relative"
                 >
                   <img
-                    src={product.img}
+                    src={selectedImage}
                     alt={product.name}
                     className="absolute inset-0 w-full h-full object-contain rounded-2xl shadow-lg"
                   />
+                  {/* Previous Button */}
+                  <button
+                    onClick={handlePreviousImage}
+                    className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-50 hover:bg-opacity-75 text-gray-700 rounded-full p-2"
+                  >
+                    &#8592;
+                  </button>
+                  {/* Next Button */}
+                  <button
+                    onClick={handleNextImage}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-50 hover:bg-opacity-75 text-gray-700 rounded-full p-2"
+                  >
+                    &#8594;
+                  </button>
                 </motion.div>
+                <div className="flex mt-4 space-x-2">
+                  {product.images.map((img, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedImage(img)}
+                      className={`w-16 h-16 object-cover rounded ${
+                        selectedImage === img ? 'border-2 border-pink-600' : 'border'
+                      } cursor-pointer`}
+                    >
+                      <img
+                        src={img}
+                        alt={`${product.name} ${index + 1}`}
+                        className="w-full h-full object-cover rounded"
+                      />
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Product Info Section */}
@@ -257,7 +304,7 @@ const ProductDetail = () => {
                   </h1>
                   <div className="flex items-center justify-between">
                     <p className="text-3xl font-semibold text-pink-600">
-                      {product.price}
+                      ₹{product.price}
                     </p>
                     <div className="flex items-center space-x-2 bg-yellow-50 px-3 py-1 rounded-full">
                       <FaStar className="text-yellow-400" />

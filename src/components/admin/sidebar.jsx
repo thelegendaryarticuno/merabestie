@@ -11,8 +11,9 @@ const Sidebar = () => {
     const [productData, setProductData] = useState({
         name: '',
         price: '',
-        img: '',
+        images: [],
         category: '',
+        description: '',
         rating: 0,
         productId: '',
         inStockValue: 0,
@@ -62,8 +63,12 @@ const Sidebar = () => {
     };
 
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setProductData({...productData, [name]: value});
+        const { name, value, files } = e.target;
+        if(name === 'images') {
+            setProductData({...productData, images: files});
+        } else {
+            setProductData({...productData, [name]: value});
+        }
     };
 
     const handleLogout = async () => {
@@ -87,12 +92,20 @@ const Sidebar = () => {
 
     const handleSubmit = async () => {
         try {
+            const formData = new FormData();
+            Object.keys(productData).forEach(key => {
+                if(key === 'images') {
+                    Array.from(productData.images).forEach(file => {
+                        formData.append('images', file);
+                    });
+                } else {
+                    formData.append(key, productData[key]);
+                }
+            });
+
             const response = await fetch('https://ecommercebackend-8gx8.onrender.com/create-product', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(productData)
+                body: formData
             });
             
             if(response.ok) {
@@ -100,8 +113,9 @@ const Sidebar = () => {
                 setProductData({
                     name: '',
                     price: '',
-                    img: '',
+                    images: [],
                     category: '',
+                    description: '',
                     rating: 0,
                     productId: '',
                     inStockValue: 0,
@@ -144,10 +158,9 @@ const Sidebar = () => {
                             className="w-full mb-3 p-2 border rounded"
                         />
                         <input
-                            type="text"
-                            name="img"
-                            placeholder="Image URL"
-                            value={productData.img}
+                            type="file"
+                            name="images"
+                            multiple
                             onChange={handleInputChange}
                             className="w-full mb-3 p-2 border rounded"
                         />
@@ -158,6 +171,14 @@ const Sidebar = () => {
                             value={productData.category}
                             onChange={handleInputChange}
                             className="w-full mb-3 p-2 border rounded"
+                        />
+                        <textarea
+                            name="description"
+                            placeholder="Product Description"
+                            value={productData.description}
+                            onChange={handleInputChange}
+                            className="w-full mb-3 p-2 border rounded"
+                            rows={4}
                         />
                         <input
                             type="number"
@@ -286,6 +307,7 @@ const Sidebar = () => {
             </div>
         </>
     );
+
 };
 
 export default Sidebar;
