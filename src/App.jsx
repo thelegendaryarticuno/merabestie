@@ -12,7 +12,7 @@ import Checkout from "./pages/user/checkout";
 import Product from "./pages/admin/product";
 import LoginPage from "./pages/admin/login";
 import SellerPage from "./pages/admin/signup";
-import Complaints from "./pages/admin/complaints"; 
+import Complaints from "./pages/admin/complaints";
 import Orders from "./pages/admin/order";
 import Customers from "./pages/admin/customer";
 import CalendarPage from "./pages/admin/calendar";
