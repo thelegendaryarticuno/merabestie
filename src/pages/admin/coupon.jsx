@@ -57,7 +57,7 @@ const CouponPage = () => {
 
   const fetchCoupons = async () => {
     try {
-      const response = await fetch('https://ecommercebackend-8gx8.onrender.com/coupon/get-coupon');
+      const response = await fetch('https://ecommercebackend-8gx8.onrender.com/coupon/get-coupons');
       const data = await response.json();
       if (data.success) {
         setCoupons(data.coupons);
@@ -99,7 +99,7 @@ const CouponPage = () => {
 
   const handleDeleteCoupon = async (code) => {
     try {
-      const response = await fetch('https://ecommercebackend-8gx8.onrender.com/coupon/delete-coupon', {
+      const response = await fetch('https://ecommercebackend-8gx8.onrender.com/coupon/delete-coupons', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
@@ -126,11 +126,11 @@ const CouponPage = () => {
 
     try {
       const endpoint = isEditing 
-        ? 'https://ecommercebackend-8gx8.onrender.com/coupon/update-coupon'
-        : 'https://ecommercebackend-8gx8.onrender.com/coupon/save-coupon';
-      
+        ? 'https://ecommercebackend-8gx8.onrender.com/coupon/update-status'
+        : 'https://ecommercebackend-8gx8.onrender.com/coupon/save-coupons';
+      const method = isEditing?'PUT':'POST'
       const response = await fetch(endpoint, {
-        method: 'POST',
+        method: method,
         headers: {
           'Content-Type': 'application/json'
         },
@@ -208,7 +208,7 @@ const CouponPage = () => {
                       <Edit size={20} />
                     </button>
                     <div className="flex flex-col h-full">
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">{coupon.name}</h3>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2 pt-5">{coupon.name}</h3>
                       <h4 className="text-sm text-gray-500">{coupon.code}</h4>
                       <div className="flex items-center mt-auto">
                         <span className="text-3xl font-bold text-pink-600">{coupon.discountPercentage}%</span>
