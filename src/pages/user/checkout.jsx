@@ -5,11 +5,12 @@ import confetti from 'canvas-confetti';
 import { Helmet } from "react-helmet";
 import Navbar from '../../components/user/navbar/navbar';
 import { useLocation } from 'react-router-dom';
+import Footer from '../../components/user/footer/footer';
 
 const Checkout = () => {
-  const location = useLocation()
-  const total = parseFloat(location.state?.total || 0)
-  const discount = parseFloat(location.state?.discount || 0)
+  const location = useLocation();
+  const total = parseFloat(location.state?.total || 0);
+  const discount = parseFloat(location.state?.discount || 0);
   const navigate = useNavigate();
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,6 +23,7 @@ const Checkout = () => {
     phone: ''
   });
   const [saveAddress, setSaveAddress] = useState(false);
+
   useEffect(() => {
     const savedAddress = localStorage.getItem('savedShippingAddress');
     const savedSaveAddressPreference = localStorage.getItem('saveAddressPreference');
@@ -44,52 +46,99 @@ const Checkout = () => {
     fetchCartItems();
   }, []);
 
+  const getCartItemsFromLocalStorage = () => {
+    try {
+      const localCart = localStorage.getItem('guestCart');
+      if (localCart) {
+        return JSON.parse(localCart);
+      }
+    } catch (error) {
+      console.error('Error parsing local cart:', error);
+    }
+    return [];
+  };
+
   const fetchCartItems = async () => {
     const userId = sessionStorage.getItem('userId');
-    if (!userId) {
-      navigate('/login');
-      return;
-    }
-
+    
     try {
-      const cartResponse = await fetch(`https://ecommercebackend-8gx8.onrender.com/cart/${userId}`);
-      const cartData = await cartResponse.json();
+      if (userId) {
+        // Fetch from backend if user is logged in
+        const cartResponse = await fetch(`https://ecommercebackend-8gx8.onrender.com/cart/get-cart`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ userId })
+        });
+        const cartData = await cartResponse.json();
+        console.log(cartData)
 
-      if (!cartData.success) {
-        setLoading(false);
-        return;
-      }
-
-      const groupedItems = cartData.cart.reduce((acc, item) => {
-        if (!acc[item.productId]) {
-          acc[item.productId] = {
-            productId: item.productId,
-            productQty: item.productQty
-          };
-        } else {
-          acc[item.productId].productQty += item.productQty;
+        if (!cartData.success) {
+          setLoading(false);
+          return;
         }
-        return acc;
-      }, {});
 
-      const productPromises = Object.values(groupedItems).map(async (item) => {
-        const productResponse = await fetch(`https://ecommercebackend-8gx8.onrender.com/product/${item.productId}`);
-        const productData = await productResponse.json();
+        const groupedItems = cartData.cart.productsInCart.reduce((acc, item) => {
+          if (!acc[item.productId]) {
+            acc[item.productId] = {
+              productId: item.productId,
+              productQty: item.productQty
+            };
+          } else {
+            acc[item.productId].productQty += item.productQty;
+          }
+          return acc;
+        }, {});
+
+        const productPromises = Object.values(groupedItems).map(async (item) => {
+          console.log(item)
+          const productResponse = await fetch('https://ecommercebackend-8gx8.onrender.com/:productId', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId: item.productId })
+          });
+          const productData = await productResponse.json();
+          
+          if (productData.success) {
+            return {
+              ...productData.product,
+              quantity: item.productQty
+            };
+          }
+          return null;
+        });
+
+        const products = await Promise.all(productPromises);
+        setCartItems(products.filter(product => product !== null));
+      } else {
+        // Get cart items from localStorage if user is not logged in
+        const localCartItems = getCartItemsFromLocalStorage();
         
-        if (productData.success) {
-          return {
-            ...productData.product,
-            quantity: item.productQty
-          };
-        }
-        return null;
-      });
+        // Fetch product details for local cart items
+        const productPromises = localCartItems.map(async (item) => {
+          const productResponse = await fetch('https://ecommercebackend-8gx8.onrender.com/:productId', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId: item.productId })
+          });
+          const productData = await productResponse.json();
+          
+          if (productData.success) {
+            return {
+              ...productData.product,
+              quantity: item.quantity
+            };
+          }
+          return null;
+        });
 
-      const products = await Promise.all(productPromises);
-      setCartItems(products.filter(product => product !== null));
-      setLoading(false);
+        const products = await Promise.all(productPromises);
+        setCartItems(products.filter(product => product !== null));
+      }
     } catch (err) {
       console.error('Error fetching cart items:', err);
+    } finally {
       setLoading(false);
     }
   };
@@ -111,15 +160,11 @@ const Checkout = () => {
   const handleSaveAddressToggle = (e) => {
     const isChecked = e.target.checked;
     setSaveAddress(isChecked);
-
-    // Save address preference
     localStorage.setItem('saveAddressPreference', JSON.stringify(isChecked));
 
     if (isChecked) {
-      // Save current address to localStorage
       localStorage.setItem('savedShippingAddress', JSON.stringify(address));
     } else {
-      // Remove saved address from localStorage
       localStorage.removeItem('savedShippingAddress');
     }
   };
@@ -129,6 +174,7 @@ const Checkout = () => {
   };
 
   const calculateSubtotal = () => {
+    console.log(cartItems)
     return cartItems.reduce((total, item) => {
       return total + (parseFloat(item.price.replace(/[^\d.]/g, '')) * item.quantity);
     }, 0);
@@ -141,8 +187,8 @@ const Checkout = () => {
 
   const handlePlaceOrder = async () => {
     const userId = sessionStorage.getItem('userId');
-
-    if (saveAddress) {
+    
+    if (saveAddress && userId) {
       try {
         await fetch('https://ecommercebackend-8gx8.onrender.com/update-address', {
           method: 'POST',
@@ -164,43 +210,55 @@ const Checkout = () => {
     const time = now.toLocaleTimeString('en-GB');
 
     const productsOrdered = cartItems.map(item => ({
-      productId: item.productId,
+      productId: item._id,
       productQty: item.quantity
     }));
 
     try {
-      const response = await fetch('https://ecommercebackend-8gx8.onrender.com/cart/place-order', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          userId,
-          date,
-          time,
-          address: Object.values(address).join(', '),
-          price: total,
-          productsOrdered
-        })
-      });
-
-      const data = await response.json();
-      
-      if (data.message === 'Order placed successfully') {
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 }
+      if (userId) {
+        // Place order through backend if logged in
+        const response = await fetch('https://ecommercebackend-8gx8.onrender.com/cart/place-order', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            userId,
+            date,
+            time,
+            address: Object.values(address).join(', '),
+            price: total,
+            productsOrdered
+          })
         });
 
-        setShowSuccess(true);
-        setTimeout(() => {
-          navigate('/cart');
-        }, 5000);
+        const data = await response.json();
+        
+        if (data.message === 'Order placed successfully') {
+          handleOrderSuccess();
+        }
+      } else {
+        // Handle guest checkout
+        // Clear local cart after successful order
+        localStorage.removeItem('guestCart');
+        handleOrderSuccess();
       }
     } catch (err) {
       console.error('Error placing order:', err);
     }
+  };
+
+  const handleOrderSuccess = () => {
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+
+    setShowSuccess(true);
+    setTimeout(() => {
+      navigate('/cart');
+    }, 5000);
   };
 
   if (loading) {
@@ -218,17 +276,13 @@ const Checkout = () => {
       </Helmet>
       <Navbar />
       
-      {/* Increased spacing between Navbar and the container */}
-      <div className="container mx-auto px-4 py-8 mt-12">
+      <div className="container mx-auto px-4 py-14 mt-12">
         <div className="flex flex-col md:flex-row gap-8">
           {/* Address Section */}
-          <div className="md:w-2/3 bg-white rounded-2xl shadow-lg p-8">
+          <div className="md:w-2/3 bg-white rounded-2xl p-8">
             <div className="flex items-center mb-6 space-x-4">
-              <MapPin className="text-pink-600 w-8 h-8" />
-              <h2 className="text-3xl font-bold text-gray-800">Shipping Details</h2>
+              <h2 className="text-2xl font-normal tracking-widest">SHIPPING DETAILS</h2>
             </div>
-  
-  
             
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-4">
@@ -302,10 +356,11 @@ const Checkout = () => {
               </div>
             </div>
           </div>
+
+          {/* Order Summary Section */}
           <div className="md:w-1/3 bg-white rounded-2xl shadow-lg p-8">
             <div className="flex items-center mb-6 space-x-4">
-              <ShoppingCart className="text-pink-600 w-8 h-8" />
-              <h2 className="text-3xl font-bold text-gray-800">Order Summary</h2>
+              <h2 className="text-4xl font-thin">Order Summary</h2>
             </div>
             
             <div className="space-y-4 max-h-96 overflow-y-auto">
@@ -313,7 +368,7 @@ const Checkout = () => {
                 <div key={item._id} className="flex justify-between items-center border-b pb-4">
                   <div className="flex items-center space-x-4">
                     <img 
-                      src={item.img[0]?item.img[0]:item.img} 
+                      src={item.img[0] || item.img} 
                       alt={item.name} 
                       className="w-20 h-20 object-cover rounded-lg shadow-sm"
                     />
@@ -322,7 +377,7 @@ const Checkout = () => {
                       <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
                     </div>
                   </div>
-                  <p className="font-medium text-gray-800">
+                  <p className="font-medium text-gray-800 ">
                     Rs. {(parseFloat(item.price.replace(/[^\d.]/g, '')) * item.quantity).toFixed(2)}
                   </p>
                 </div>
@@ -335,7 +390,6 @@ const Checkout = () => {
                 <span className="font-semibold">Rs. {calculateSubtotal().toFixed(2)}</span>
               </div>
               
-              {/* Discount Section */}
               {discount > 0 && (
                 <div className="flex justify-between text-gray-700">
                   <div className="flex items-center space-x-2">
@@ -355,7 +409,7 @@ const Checkout = () => {
               
               <div className="flex justify-between text-xl font-bold border-t pt-4">
                 <span>Total</span>
-                <span className="text-pink-600">Rs. {total.toFixed(2)}</span>
+                <span className="font-thin tracking-widest">Rs. {total.toFixed(2)}</span>
               </div>
               
               <button
@@ -363,34 +417,36 @@ const Checkout = () => {
                 disabled={!isAddressValid()}
                 className={`w-full flex items-center justify-center space-x-2 py-4 rounded-lg transition-all duration-300 ${
                   isAddressValid() 
-                    ? 'bg-black text-white hover:bg-gray-800 hover:shadow-lg' 
-                    : 'bg-gray-300 cursor-not-allowed opacity-50'
-                }`}
-              >
-                <CreditCard className="w-6 h-6" />
-                <span>Place Order</span>
-              </button>
-            </div>
+                  ? 'bg-black text-white hover:bg-gray-800 hover:shadow-lg' 
+                  : 'bg-gray-300 cursor-not-allowed opacity-50'
+              }`}
+            >
+              <CreditCard className="w-6 h-6" />
+              <span>Place Order</span>
+            </button>
           </div>
         </div>
-        {showSuccess && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-2xl p-10 text-center shadow-2xl">
-              <CheckCircle className="w-24 h-24 text-green-500 mx-auto mb-6" />
-              <h3 className="text-3xl font-bold text-gray-800 mb-4">Order Placed Successfully!</h3>
-              <p className="text-gray-600 mb-6">Your order has been processed. Check your email for tracking details.</p>
-              <button 
-                onClick={() => navigate('/cart')}
-                className="bg-pink-600 text-white px-6 py-3 rounded-lg hover:bg-pink-700 transition-colors"
-              >
-                Back to Cart
-              </button>
-              </div>
-          </div>
-        )}
       </div>
+
+      {/* Success Modal */}
+      {showSuccess && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-2xl p-10 text-center shadow-2xl">
+            <CheckCircle className="w-24 h-24 text-green-500 mx-auto mb-6" />
+            <h3 className="text-3xl font-bold text-gray-800 mb-4">Order Placed Successfully!</h3>
+            <p className="text-gray-600 mb-6">Your order has been processed. Check your email for tracking details.</p>
+            <button 
+              onClick={() => navigate('/cart')}
+              className="bg-pink-600 text-white px-6 py-3 rounded-lg hover:bg-pink-700 transition-colors"
+            >
+              Back to Cart
+            </button>
+          </div>
+        </div>
+      )}
     </div>
-  );
+  </div>
+);
 };
 
 export default Checkout;
