@@ -24,6 +24,7 @@ import DashboardPage from "./pages/admin/daashboard";
 import Order from "./pages/user/orders";
 import GiftBox from "./pages/user/gift-box";
 import Reviews from "./pages/admin/review";
+import SEO from "./pages/admin/SEO";
 
 function App() {
   return (
@@ -56,6 +57,7 @@ function App() {
           <Route path="/admin/customers/:sellerId" element={<Customers />} />
           <Route path="/admin/calendar/:sellerId" element={<CalendarPage />} />
           <Route path="/admin/reviews/:sellerId" element={<Reviews />} />
+          <Route path="/admin/SEO/:sellerId" element={<SEO />} />
 
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
