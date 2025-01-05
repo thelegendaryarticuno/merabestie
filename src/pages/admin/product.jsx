@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/admin/sidebar';
-import { Pencil, Save, Search, ArrowUpDown } from 'lucide-react';
+import { Pencil, Save, Search, ArrowUpDown, Trash } from 'lucide-react';
 import { Helmet } from "react-helmet";
 import { useParams, useNavigate } from 'react-router-dom';
 
@@ -55,7 +55,7 @@ const Product = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [products]);
 
   const fetchProducts = async () => {
     try {
@@ -66,6 +66,21 @@ const Product = () => {
       console.error('Error fetching products:', error);
     }
   };
+
+  const handleDelete = async (product)=>{
+    try {
+      await fetch('https://ecommercebackend-8gx8.onrender.com/delete-product', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          productId : product.productId
+        })})
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   const handleEdit = (product) => {
     setEditingId(product.productId);
@@ -199,6 +214,7 @@ const Product = () => {
                   </div>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Delete</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -280,6 +296,14 @@ const Product = () => {
                         <Pencil size={18} />
                       </button>
                     )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <button
+                        onClick={() => handleDelete(product)}
+                        className="text-blue-600 hover:text-blue-900"
+                      >
+                        <Trash size={18} />
+                      </button>
                   </td>
                 </tr>
               ))}
