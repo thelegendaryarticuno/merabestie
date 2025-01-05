@@ -23,7 +23,7 @@ export default function SignUp() {
     }
     try {
       await signup(name, email, password, mobile);
-      window.location.href = '/HomePage';
+      window.location.href = '/cart';
     } catch (err) {
       setError('Error signing up. Try again.');
     }

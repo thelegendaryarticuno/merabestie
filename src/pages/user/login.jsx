@@ -18,7 +18,7 @@ const Login = () => {
     try {
       const response = await login(emailOrMobile, password);
       if (response === 'Login successful') {
-        window.location.href = '/';
+        window.location.href = '/cart';
       }
     } catch (error) {
       setError('Login failed. Please check your credentials.');
