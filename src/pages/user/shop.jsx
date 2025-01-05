@@ -135,7 +135,7 @@ const Shop = ({ category }) => {
         <Link to={`/${product.productId}`} className="block">
           <div className="relative">
             <img 
-              src={product.img} 
+              src={product.img[0]?product.img[0]:product.img} 
               alt={product.name}
               className="w-full h-64 object-cover object-center transform transition-transform duration-300 group-hover:scale-105"
             />

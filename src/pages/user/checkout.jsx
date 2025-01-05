@@ -313,7 +313,7 @@ const Checkout = () => {
                 <div key={item._id} className="flex justify-between items-center border-b pb-4">
                   <div className="flex items-center space-x-4">
                     <img 
-                      src={item.img} 
+                      src={item.img[0]?item.img[0]:item.img} 
                       alt={item.name} 
                       className="w-20 h-20 object-cover rounded-lg shadow-sm"
                     />

@@ -98,7 +98,7 @@ const RecentlyViewed = () => {
             >
               <div className="relative aspect-square bg-gray-100">
                 <img
-                  src={product.img}
+                  src={product.img[0]?product.img[0]:product.img}
                   alt={product.name}
                   className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform"
                 />
