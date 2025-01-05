@@ -37,7 +37,7 @@ const SearchBar = () => {
             product.price && 
             product.img && 
             product._id &&
-            product.visibility === "on"
+            product.visibility === "on" || true
           );
           
           setSearchResults(validProducts);
