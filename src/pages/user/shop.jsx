@@ -154,8 +154,8 @@ const Shop = ({ category }) => {
           className={`block ${layout === "list" ? "sm:w-1/3" : "w-full"}`}
         >
           <div className="relative">
-            <img
-              src={product.img}
+            <img 
+              src={product.img[0]?product.img[0]:product.img} 
               alt={product.name}
               className="w-full h-64 object-cover object-center transform transition-transform duration-300 group-hover:scale-105"
             />

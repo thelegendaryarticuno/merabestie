@@ -239,7 +239,7 @@ const CartItems = () => {
               <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 w-full">
                 <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
                   <img
-                    src={item.img}
+                    src={item.img[0]?item.img[0]:item.img}
                     alt={item.name}
                     className="w-full h-full object-cover"
                   />

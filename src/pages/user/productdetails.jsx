@@ -64,7 +64,11 @@ const ProductDetail = () => {
         const data = await response.json();
         if (data.success) {
           // Duplicate the same image multiple times
-          const images = Array(3).fill(data.product.img);
+          let images
+          if(!Array.isArray(data.product.img))
+            images = Array(3).fill(data.product.img);
+          else
+            images = data.product.img
           setProduct({ ...data.product, images });
           setSelectedImage(images[0]); // Initialize with first image
           calculateStockStatus(data.product);
@@ -102,7 +106,13 @@ const ProductDetail = () => {
 
   const fetchRelatedProducts = async (category) => {
     try {
-      const response = await fetch(`https://ecommercebackend-8gx8.onrender.com/products?category=${category}`);
+      const response = await fetch('https://ecommercebackend-8gx8.onrender.com/product/category', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({category}),
+      });
       const data = await response.json();
       if (data.success) {
         setRelatedProducts(data.products.slice(0, 4));
@@ -453,10 +463,10 @@ const ProductDetail = () => {
           <h2 className="text-3xl font-semibold text-gray-900 mb-6">Recently Viewed</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {recentlyViewed.map((item) => (
-              <Link key={item.productId} to={`/product/${item.productId}`}>
+              <Link key={item.productId} to={`/${item.productId}`}>
                 <div className="bg-white shadow-lg rounded-xl overflow-hidden">
                   <img 
-                    src={item.img} 
+                    src={item.img[0]?item.img[0]:item.img} 
                     alt={item.name} 
                     className="w-full h-64 object-cover" 
                   />
