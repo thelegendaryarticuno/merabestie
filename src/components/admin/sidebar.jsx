@@ -16,7 +16,6 @@ import {
   Loader2,
   Image as ImageIcon,
 } from "lucide-react";
-import path from "path";
 
 const Sidebar = () => {
   const navigate = useNavigate();
