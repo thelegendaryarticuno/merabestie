@@ -3,6 +3,7 @@ import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaPaperPlane } from "react-icons/f
 import { motion } from "framer-motion";
 import Navbar from "../../components/user/navbar/navbar";
 import { Helmet } from "react-helmet";
+import SEOComponent from "../../components/SEO/SEOComponent";
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({
@@ -51,10 +52,7 @@ const ContactUs = () => {
 
   return (
     <>
-    <Helmet>
-      <title>Contact Us | Mera Bestie</title>
-      <meta name="description" content="Get in touch with Mera Bestie. We're here to help and answer any questions you may have." />
-    </Helmet>
+    <SEOComponent/>
     <Navbar className='z-0 mb-auto' />
     <div className="bg-gradient-to-br from-pink-50 to-blue-50 min-h-screen mt-16">
       

@@ -13,6 +13,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Helmet } from "react-helmet";
 import Navbar from "../../components/user/navbar/navbar";
+import SEOComponent from "../../components/SEO/SEOComponent";
 
 const Shop = ({ category }) => {
   // State declarations
@@ -209,9 +210,7 @@ const Shop = ({ category }) => {
 
   return (
     <>
-      <Helmet>
-        <title>Shop | Mera Bestie</title>
-      </Helmet>
+      <SEOComponent/>
 
       <div className="bg-gradient-to-r from-indigo-500 via-pink-500 to-pink-500 text-white">
         <div className="max-w-7xl mx-auto px-4 py-3">

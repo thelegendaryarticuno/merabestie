@@ -6,6 +6,7 @@ import { Helmet } from "react-helmet";
 import Navbar from '../../components/user/navbar/navbar';
 import { useLocation } from 'react-router-dom';
 import Footer from '../../components/user/footer/footer';
+import SEOComponent from '../../components/SEO/SEOComponent';
 
 const Checkout = () => {
   const location = useLocation();
@@ -271,9 +272,7 @@ const Checkout = () => {
 
   return (      
     <div className="bg-gray-50 min-h-screen">
-      <Helmet>
-        <title>Checkout | Mera Bestie</title>
-      </Helmet>
+      <SEOComponent/>
       <Navbar />
       
       <div className="container mx-auto px-4 py-14 mt-12">

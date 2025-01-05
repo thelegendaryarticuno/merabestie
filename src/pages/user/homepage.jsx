@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaStar } from 'react-icons/fa';
 import Navbar from "../../components/user/navbar/navbar";
 import Footer from "../../components/user/footer/footer";
+import SEOComponent from '../../components/SEO/SEOComponent';
 
 const ScrollProgress = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -214,6 +215,7 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      <SEOComponent/>
       <ScrollProgress />
       <Navbar />
       

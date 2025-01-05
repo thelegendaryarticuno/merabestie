@@ -38,7 +38,6 @@ export default function SignUp() {
         <div className="fixed top-0 left-0 w-full z-50">
           <Navbar />
         </div>
-        
         <motion.div 
           className="w-full max-w-md bg-white shadow-2xl rounded-2xl overflow-hidden mt-auto"
           initial={{ opacity: 0, scale: 0.9 }}
