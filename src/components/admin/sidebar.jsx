@@ -16,6 +16,7 @@ import {
   Loader2,
   Image as ImageIcon,
 } from "lucide-react";
+import path from "path";
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -88,6 +89,16 @@ const Sidebar = () => {
       icon: <Ticket className="w-5 h-5" />, 
       path: `/seller/coupons/${sellerId}` 
     },
+    {
+      name: "Reviews",
+      icon: <MessageSquare className="w-5 h-5" />,
+      path: `/admin/reviews/${sellerId}`,
+    },
+    {
+      name: "SEO",
+      icon: <MessageSquare className="w-5 h-5" />,
+     path: `/admin/SEO/${sellerId}`,
+    }
   ];
 
   const toggleSidebar = () => {
