@@ -11,6 +11,10 @@ import {
   LayoutDashboard,
   LogOut,
   Ticket,
+  Upload,
+  X,
+  Loader2,
+  Image as ImageIcon,
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -18,10 +22,13 @@ const Sidebar = () => {
   const { sellerId } = useParams();
   const [isOpen, setIsOpen] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [productData, setProductData] = useState({
     name: "",
     price: "",
-    images: [],
+    img: [],
     category: "",
     description: "",
     rating: 0,
@@ -31,64 +38,60 @@ const Sidebar = () => {
   });
   const location = useLocation();
 
-  // Set initial state based on screen size and update on resize
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024) {
-        // lg breakpoint
         setIsOpen(true);
       } else {
         setIsOpen(false);
       }
     };
 
-    // Set initial state
     handleResize();
-
-    // Add resize listener
     window.addEventListener("resize", handleResize);
-
-    // Cleanup
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const menuItems = [
     {
       name: "Dashboard",
-      icon: <LayoutDashboard />,
+      icon: <LayoutDashboard className="w-5 h-5" />,
       path: `/admin/${sellerId}`,
     },
     {
       name: "Products",
-      icon: <Package />,
+      icon: <Package className="w-5 h-5" />,
       path: `/admin/products/${sellerId}`,
     },
     {
       name: "Orders",
-      icon: <ShoppingBag />,
+      icon: <ShoppingBag className="w-5 h-5" />,
       path: `/admin/orders/${sellerId}`,
     },
     {
       name: "Complaints",
-      icon: <MessageSquare />,
+      icon: <MessageSquare className="w-5 h-5" />,
       path: `/admin/complaints/${sellerId}`,
     },
     {
       name: "Customers",
-      icon: <Users />,
+      icon: <Users className="w-5 h-5" />,
       path: `/admin/customers/${sellerId}`,
     },
     {
       name: "Calendar",
-      icon: <Calendar />,
+      icon: <Calendar className="w-5 h-5" />,
       path: `/admin/calendar/${sellerId}`,
     },
-    { name: "Coupons", icon: <Ticket />, path: `/seller/coupons/${sellerId}` },
+    { 
+      name: "Coupons", 
+      icon: <Ticket className="w-5 h-5" />, 
+      path: `/seller/coupons/${sellerId}` 
+    },
   ];
 
   const toggleSidebar = () => {
     if (window.innerWidth < 1024) {
-      // Only allow toggle on smaller screens
       setIsOpen(!isOpen);
     }
   };
@@ -99,12 +102,60 @@ const Sidebar = () => {
   };
 
   const handleInputChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === "images") {
-      setProductData({ ...productData, images: files });
-    } else {
-      setProductData({ ...productData, [name]: value });
+    const { name, value } = e.target;
+    setProductData({ ...productData, [name]: value });
+  };
+
+  const handleImageSelect = (e) => {
+    if (e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+      setUploadStatus('');
     }
+  };
+
+  const handleImageUpload = async () => {
+    if (!selectedFile) {
+      setUploadStatus('Please select an image first');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('image', selectedFile);
+
+    try {
+      setIsUploading(true);
+      setUploadStatus('Uploading...');
+
+      const response = await fetch('https://ecommercebackend-8gx8.onrender.com/image/image-upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        setProductData(prev => ({
+          ...prev,
+          img: [...prev.img, data.imageUrl]
+        }));
+        setUploadStatus('Upload successful');
+        setSelectedFile(null);
+        const fileInput = document.getElementById('imageInput');
+        if (fileInput) fileInput.value = '';
+      } else {
+        setUploadStatus('Upload failed: ' + data.message);
+      }
+    } catch (error) {
+      setUploadStatus('Upload failed: ' + error.message);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const removeImage = (indexToRemove) => {
+    setProductData(prev => ({
+      ...prev,
+      img: prev.img.filter((_, index) => index !== indexToRemove)
+    }));
   };
 
   const handleLogout = async () => {
@@ -131,22 +182,19 @@ const Sidebar = () => {
 
   const handleSubmit = async () => {
     try {
-      const formData = new FormData();
-      Object.keys(productData).forEach((key) => {
-        if (key === "images") {
-          Array.from(productData.images).forEach((file) => {
-            formData.append("images", file);
-          });
-        } else {
-          formData.append(key, productData[key]);
-        }
-      });
+      if (productData.img.length === 0) {
+        setUploadStatus('Please upload at least one image');
+        return;
+      }
 
       const response = await fetch(
         "https://ecommercebackend-8gx8.onrender.com/create-product",
         {
           method: "POST",
-          body: formData,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(productData),
         }
       );
 
@@ -155,7 +203,7 @@ const Sidebar = () => {
         setProductData({
           name: "",
           price: "",
-          images: [],
+          img: [],
           category: "",
           description: "",
           rating: 0,
@@ -163,202 +211,316 @@ const Sidebar = () => {
           inStockValue: 0,
           soldStockValue: 0,
         });
+      } else {
+        const errorData = await response.json();
+        setUploadStatus('Error creating product: ' + errorData.message);
       }
     } catch (error) {
       console.error("Error creating product:", error);
+      setUploadStatus('Error creating product: ' + error.message);
     }
   };
 
   return (
     <>
-      {/* Toggle button for small screens */}
+      {/* Toggle button */}
       <button
         onClick={toggleSidebar}
-        className="fixed top-4 left-4 p-2 rounded-lg hover:bg-pink-200 lg:hidden z-50"
+        className="fixed top-4 left-4 p-2 rounded-lg bg-white shadow-lg hover:bg-gray-100 lg:hidden z-50 transition-colors"
       >
-        <Menu size={24} />
+        <Menu className="w-6 h-6 text-gray-600" />
       </button>
 
+      {/* Product Dialog */}
       {showDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-96">
-            <h2 className="text-xl font-bold mb-4">Add New Product</h2>
-            <input
-              type="text"
-              name="name"
-              placeholder="Product Name"
-              value={productData.name}
-              onChange={handleInputChange}
-              className="w-full mb-3 p-2 border rounded"
-            />
-            <input
-              type="text"
-              name="price"
-              placeholder="Price"
-              value={productData.price}
-              onChange={handleInputChange}
-              className="w-full mb-3 p-2 border rounded"
-            />
-            <input
-              type="file"
-              name="images"
-              multiple
-              onChange={handleInputChange}
-              className="w-full mb-3 p-2 border rounded"
-            />
-            <select
-              name="category"
-              value={productData.category}
-              onChange={handleInputChange}
-              className="w-full mb-3 p-2 border rounded"
-            >
-              <option value="">Select Category</option>
-              <option value="fashion">Fashion</option>
-              <option value="gift-items">Gift Items</option>
-              <option value="greeting-cards">Greeting Cards</option>
-              <option value="stationary">Stationary</option>
-            </select>
-            <textarea
-              name="description"
-              placeholder="Product Description"
-              value={productData.description}
-              onChange={handleInputChange}
-              className="w-full mb-3 p-2 border rounded"
-              rows={4}
-            />
-            <input
-              type="number"
-              name="rating"
-              placeholder="Rating"
-              value={productData.rating}
-              onChange={handleInputChange}
-              className="w-full mb-3 p-2 border rounded"
-              min={0}
-              max={5}
-            />
-            <div className="flex mb-3">
-              <input
-                type="text"
-                name="productId"
-                placeholder="Product ID"
-                value={productData.productId}
-                readOnly
-                className="w-2/3 p-2 border rounded-l"
-              />
-              <button
-                onClick={generateProductId}
-                className="w-1/3 bg-pink-500 text-white p-2 rounded-r"
-              >
-                Generate
-              </button>
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto animate-in fade-in-0 zoom-in-95">
+                {/* Header */}
+                <div className="border-b p-6">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-semibold text-gray-800">Add New Product</h2>
+                    <button
+                      onClick={() => setShowDialog(false)}
+                      className="rounded-full p-2 hover:bg-gray-100 transition-colors"
+                    >
+                      <X className="w-5 h-5 text-gray-500" />
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="p-6 space-y-8">
+                  {/* Image Upload Section */}
+                  <section className="space-y-4">
+                    <h3 className="text-base font-semibold text-gray-800">Product Images</h3>
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-4">
+                        <label className="flex-1 cursor-pointer group">
+                          <div className="flex items-center justify-center h-36 px-4 transition-all border-2 border-dashed rounded-xl border-gray-300 group-hover:border-pink-400 group-hover:bg-pink-50/50">
+                            <div className="flex flex-col items-center space-y-2 text-center">
+                              <ImageIcon className="w-8 h-8 text-gray-400 group-hover:text-pink-500" />
+                              <span className="text-sm text-gray-500 group-hover:text-pink-600">
+                                {selectedFile ? selectedFile.name : 'Drop image here or click to browse'}
+                              </span>
+                            </div>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleImageSelect}
+                              className="hidden"
+                              disabled={isUploading}
+                            />
+                          </div>
+                        </label>
+                        <button
+                          onClick={handleImageUpload}
+                          disabled={!selectedFile || isUploading}
+                          className={`px-4 py-2.5 rounded-lg flex items-center gap-2 transition-all ${
+                            !selectedFile || isUploading
+                              ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                              : 'bg-pink-500 hover:bg-pink-600 text-white shadow-sm'
+                          }`}
+                        >
+                          {isUploading ? (
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                          ) : (
+                            <Upload className="w-5 h-5" />
+                          )}
+                          <span className="font-medium">{isUploading ? 'Uploading...' : 'Upload'}</span>
+                        </button>
+                      </div>
+                      
+                      {uploadStatus && (
+                        <p className={`text-sm font-medium ${
+                          uploadStatus.includes('failed') || uploadStatus.includes('Error')
+                            ? 'text-red-600'
+                            : 'text-green-600'
+                        }`}>
+                          {uploadStatus}
+                        </p>
+                      )}
+        
+                      {/* Image Preview Grid */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {productData.img.map((url, index) => (
+                          <div key={index} className="relative group rounded-xl overflow-hidden shadow-sm">
+                            <img
+                              src={url}
+                              alt={`Product ${index + 1}`}
+                              className="w-full h-24 object-cover"
+                            />
+                            <button
+                              onClick={() => removeImage(index)}
+                              className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200"
+                            >
+                              <X className="w-6 h-6 text-white" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </section>
+        
+                  {/* Product Form */}
+                  <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700">Product Name</label>
+                      <input
+                        type="text"
+                        name="name"
+                        value={productData.name}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-shadow outline-none"
+                        placeholder="Enter product name"
+                      />
+                    </div>
+        
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700">Price</label>
+                      <input
+                        type="number"
+                        name="price"
+                        value={productData.price}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-shadow outline-none"
+                        placeholder="Enter price"
+                      />
+                    </div>
+        
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700">Category</label>
+                      <select
+                        name="category"
+                        value={productData.category}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-shadow outline-none"
+                      >
+                        <option value="">Select Category</option>
+                        <option value="fashion">Fashion</option>
+                        <option value="gift-items">Gift Items</option>
+                        <option value="greeting-cards">Greeting Cards</option>
+                        <option value="stationary">Stationary</option>
+                      </select>
+                    </div>
+        
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700">Rating</label>
+                      <input
+                        type="number"
+                        name="rating"
+                        value={productData.rating}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-shadow outline-none"
+                        min={0}
+                        max={5}
+                        step={0.1}
+                        placeholder="Enter rating (0-5)"
+                      />
+                    </div>
+        
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700">Product ID</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          name="productId"
+                          value={productData.productId}
+                          readOnly
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 outline-none"
+                          placeholder="Click generate to create ID"
+                        />
+                        <button
+                          onClick={generateProductId}
+                          className="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors shadow-sm font-medium"
+                        >
+                          Generate
+                        </button>
+                      </div>
+                    </div>
+        
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700">Stock Information</label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <input
+                          type="number"
+                          name="inStockValue"
+                          value={productData.inStockValue}
+                          onChange={handleInputChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-shadow outline-none"
+                          placeholder="In Stock"
+                        />
+                        <input
+                          type="number"
+                          name="soldStockValue"
+                          value={productData.soldStockValue}
+                          onChange={handleInputChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-shadow outline-none"
+                          placeholder="Sold Stock"
+                        />
+                      </div>
+                    </div>
+                  </section>
+        
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Description</label>
+                    <textarea
+                      name="description"
+                      value={productData.description}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-shadow outline-none"
+                      rows={4}
+                      placeholder="Enter product description"
+                    />
+                  </div>
+        
+                  {/* Form Actions */}
+                  <div className="flex items-center justify-end gap-3 pt-6 border-t">
+                    <button
+                      onClick={() => setShowDialog(false)}
+                      className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSubmit}
+                      disabled={isUploading}
+                      className="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors disabled:bg-pink-300 shadow-sm font-medium"
+                    >
+                      Save Product
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
-            <input
-              type="number"
-              name="inStockValue"
-              placeholder="In Stock"
-              value={productData.inStockValue}
-              onChange={handleInputChange}
-              className="w-full mb-3 p-2 border rounded"
-            />
-            <input
-              type="number"
-              name="soldStockValue"
-              placeholder="Sold Stock"
-              value={productData.soldStockValue}
-              onChange={handleInputChange}
-              className="w-full mb-3 p-2 border rounded"
-            />
-
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setShowDialog(false)}
-                className="px-4 py-2 bg-gray-300 rounded"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSubmit}
-                className="px-4 py-2 bg-pink-500 text-white rounded"
-              >
-                Save Product
-              </button>
-            </div>
-          </div>
-        </div>
       )}
 
+      {/* Sidebar */}
       <div
-        className={`fixed left-0 top-0 h-screen bg-pink-50 shadow-lg transition-all duration-300 flex flex-col 
-                lg:translate-x-0 lg:w-64
-                ${isOpen ? "w-64" : "w-20"}`}
+        className={`fixed left-0 top-0 h-screen bg-gradient-to-b from-pink-50 to-white shadow-xl transition-all duration-300 
+                  lg:translate-x-0 lg:w-64 z-40
+                  ${isOpen ? "translate-x-0 w-64" : "-translate-x-full w-64 lg:translate-x-0 lg:w-20"}`}
       >
-        <div className="flex items-center p-4">
+        <div className="flex items-center justify-between p-6 border-b">
           {isOpen && (
-            <div className="text-2xl font-bold text-gray-800">Mera Bestie</div>
+            <div className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
+              Mera Bestie
+            </div>
           )}
         </div>
 
-        <div className="flex-grow flex items-center">
-          <ul className="space-y-2 p-4 w-full">
-            {menuItems.map((item) => (
-              <li key={item.path}>
-                <Link
-                  to={item.path}
-                  className={`flex items-center p-2 rounded-lg transition-colors
-                                        ${
-                                          location.pathname === item.path
-                                            ? "bg-pink-200 text-pink-800"
-                                            : "text-gray-700 hover:bg-pink-100"
-                                        }
-                                        ${
-                                          isOpen
-                                            ? "justify-start space-x-4"
-                                            : "justify-center"
-                                        }`}
+        <div className="flex flex-col h-[calc(100vh-160px)] justify-between">
+          <nav className="flex-1 px-4 py-6">
+            <ul className="space-y-1">
+              {menuItems.map((item) => (
+                <li key={item.path}>
+                  <Link
+                    to={item.path}
+                    className={`flex items-center px-4 py-3 rounded-lg transition-all
+                      ${location.pathname === item.path
+                        ? "bg-pink-100 text-pink-600"
+                        : "text-gray-600 hover:bg-pink-50 hover:text-pink-500"
+                      }
+                      ${isOpen ? "justify-start space-x-3" : "justify-center"}`}
+                  >
+                    {item.icon}
+                    {isOpen && <span className="font-medium">{item.name}</span>}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <div className="p-4 space-y-4">
+            {isOpen && (
+              <>
+                <button
+                  onClick={() => setShowDialog(true)}
+                  className="w-full flex items-center justify-center px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors"
                 >
-                  <span className="text-xl">{item.icon}</span>
-                  {isOpen && <span>{item.name}</span>}
+                  <Package className="w-5 h-5 mr-2" />
+                  Add Product
+                </button>
+
+                <Link
+                  to="/"
+                  className="w-full flex items-center justify-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                >
+                  Go to Website
                 </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
 
-        <div className="mt-auto">
-          <div className={`p-4 ${isOpen ? "block" : "hidden"}`}>
-            <p className="text-center text-gray-600 mb-2">
-              Please, manage your products through the button below.
-            </p>
-            <button
-              onClick={() => setShowDialog(true)}
-              className="w-full bg-pink-300 text-white py-2 rounded hover:bg-pink-400 mb-2"
-            >
-              + Add Product
-            </button>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center justify-center px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                >
+                  <LogOut className="w-5 h-5 mr-2" />
+                  Logout
+                </button>
 
-            <Link
-              to="/"
-              className="w-full flex items-center justify-center bg-green-500 text-white py-2 rounded hover:bg-green-600 mb-2"
-            >
-              Go to Website
-            </Link>
-
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center justify-center bg-red-500 text-white py-2 rounded hover:bg-red-600"
-            >
-              <LogOut className="mr-2" size={18} />
-              Logout
-            </button>
+                <div className="text-center text-gray-400 text-sm">
+                  Mera Bestie Admin © 2024
+                </div>
+              </>
+            )}
           </div>
-
-          <footer
-            className={`text-center text-gray-500 text-sm p-4 ${
-              isOpen ? "block" : "hidden"
-            }`}
-          >
-            Mera Bestie Admin Dashboard © 2024
-          </footer>
         </div>
       </div>
     </>
