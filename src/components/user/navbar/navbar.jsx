@@ -39,33 +39,65 @@ const ProfessionalNavbar = () => {
     const fetchCartItems = async () => {
       const userId = sessionStorage.getItem("userId");
       if (!userId) return;
-
+  
       try {
+        // Fetch the cart data
         const cartResponse = await fetch(
-          `https://ecommercebackend-8gx8.onrender.com/cart/get-cart`, {
-            method: 'POST',
+          `https://ecommercebackend-8gx8.onrender.com/cart/get-cart`, 
+          {
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json'
+              "Content-Type": "application/json"
             },
             body: JSON.stringify({ userId })
           }
         );
-        const cartData = await cartResponse.json();
         
+        const cartData = await cartResponse.json();
+  
         if (cartData.success && cartData.cart && Array.isArray(cartData.cart.productsInCart)) {
-          const total = cartData.cart.productsInCart.reduce((sum, item) => sum + 1, 0);
-          setCartItemCount(total);
+          let productIds = cartData.cart.productsInCart.map(item => item.productId);
+          let validProductIds = [];
+  
+          // Validate each productId
+          for (const productId of productIds) {
+            const productResponse = await fetch(
+              `https://ecommercebackend-8gx8.onrender.com/${productId}`
+            );
+            const productData = await productResponse.json();
+  
+            if (productData.message === "Product not found") {
+              // Make a call to delete-items API for invalid productId
+              await fetch(
+                `https://ecommercebackend-8gx8.onrender.com/cart/delete-items`,
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json"
+                  },
+                  body: JSON.stringify({ userId, productId })
+                }
+              );
+            } else if (productData.success) {
+              // Keep valid productId
+              validProductIds.push(productId);
+            }
+          }
+  
+          // Set cart item count based on the length of valid product IDs
+          setCartItemCount(validProductIds.length);
         } else {
           setCartItemCount(0);
         }
       } catch (error) {
-        console.error("Error fetching cart:", error);
+        console.error("Error fetching or processing cart:", error);
         setCartItemCount(0);
       }
     };
-
+  
     fetchCartItems();
   }, []);
+  
 
   useEffect(() => {
     const handleClickOutside = (event) => {
