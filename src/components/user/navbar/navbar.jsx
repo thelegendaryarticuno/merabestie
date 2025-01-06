@@ -43,27 +43,35 @@ const ProfessionalNavbar = () => {
       try {
         // Fetch the cart data
         const cartResponse = await fetch(
-          `https://ecommercebackend-8gx8.onrender.com/cart/get-cart`, 
+          `https://ecommercebackend-8gx8.onrender.com/cart/get-cart`,
           {
             method: "POST",
             headers: {
-              "Content-Type": "application/json"
+              "Content-Type": "application/json",
             },
-            body: JSON.stringify({ userId })
+            body: JSON.stringify({ userId }),
           }
         );
-        
+  
         const cartData = await cartResponse.json();
   
         if (cartData.success && cartData.cart && Array.isArray(cartData.cart.productsInCart)) {
-          let productIds = cartData.cart.productsInCart.map(item => item.productId);
-          let validProductIds = [];
+          const productIds = cartData.cart.productsInCart.map((item) => item.productId);
+          const validProductIds = [];
   
           // Validate each productId
           for (const productId of productIds) {
             const productResponse = await fetch(
-              `https://ecommercebackend-8gx8.onrender.com/${productId}`
+              `https://ecommercebackend-8gx8.onrender.com/${productId}`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ productId }),
+              }
             );
+  
             const productData = await productResponse.json();
   
             if (productData.message === "Product not found") {
@@ -73,9 +81,9 @@ const ProfessionalNavbar = () => {
                 {
                   method: "POST",
                   headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                   },
-                  body: JSON.stringify({ userId, productId })
+                  body: JSON.stringify({ userId, productId }),
                 }
               );
             } else if (productData.success) {
@@ -98,7 +106,6 @@ const ProfessionalNavbar = () => {
     fetchCartItems();
   }, []);
   
-
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
