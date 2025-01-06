@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  RiSearchLine, 
-  RiCloseLine, 
-  RiMenu3Line, 
-  RiUser3Line, 
-  RiShoppingCart2Line, 
+import {
+  RiSearchLine,
+  RiCloseLine,
+  RiMenu3Line,
+  RiUser3Line,
+  RiShoppingCart2Line,
   RiGift2Line,
   RiHome2Line,
   RiStore2Line,
@@ -18,17 +18,19 @@ import {
   RiLoginBoxLine,
 } from "react-icons/ri";
 import SearchBar from "./SearchBar";
+import { API_URL } from '../../../constants'
 
 const ProfessionalNavbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isShopDropdownOpen, setIsShopDropdownOpen] = useState(false);
   const [userName, setUserName] = useState("");
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const [cartItemCount, setCartItemCount] = useState(0);
   const navigate = useNavigate();
-  
+
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleProfileMenu = () => setIsProfileMenuOpen(!isProfileMenuOpen);
   const toggleSearch = () => setIsSearchOpen(!isSearchOpen);
@@ -39,73 +41,34 @@ const ProfessionalNavbar = () => {
     const fetchCartItems = async () => {
       const userId = sessionStorage.getItem("userId");
       if (!userId) return;
-  
+
       try {
-        // Fetch the cart data
         const cartResponse = await fetch(
-          `https://ecommercebackend-8gx8.onrender.com/cart/get-cart`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ userId }),
-          }
+          `${API_URL}/cart/get-cart`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ userId })
+        }
         );
-  
         const cartData = await cartResponse.json();
-  
+
         if (cartData.success && cartData.cart && Array.isArray(cartData.cart.productsInCart)) {
-          const productIds = cartData.cart.productsInCart.map((item) => item.productId);
-          const validProductIds = [];
-  
-          // Validate each productId
-          for (const productId of productIds) {
-            const productResponse = await fetch(
-              `https://ecommercebackend-8gx8.onrender.com/${productId}`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ productId }),
-              }
-            );
-  
-            const productData = await productResponse.json();
-  
-            if (productData.message === "Product not found") {
-              // Make a call to delete-items API for invalid productId
-              await fetch(
-                `https://ecommercebackend-8gx8.onrender.com/cart/delete-items`,
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({ userId, productId }),
-                }
-              );
-            } else if (productData.success) {
-              // Keep valid productId
-              validProductIds.push(productId);
-            }
-          }
-  
-          // Set cart item count based on the length of valid product IDs
-          setCartItemCount(validProductIds.length);
+          const total = cartData.cart.productsInCart.reduce((sum, item) => sum + 1, 0);
+          setCartItemCount(total);
         } else {
           setCartItemCount(0);
         }
       } catch (error) {
-        console.error("Error fetching or processing cart:", error);
+        console.error("Error fetching cart:", error);
         setCartItemCount(0);
       }
     };
-  
+
     fetchCartItems();
   }, []);
-  
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
@@ -136,7 +99,7 @@ const ProfessionalNavbar = () => {
       if (userId) {
         try {
           const response = await fetch(
-            `https://ecommercebackend-8gx8.onrender.com/auth/user/${userId}`
+            `${API_URL}/auth/user/${userId}`
           );
           const data = await response.json();
           setUserName(data.name);
@@ -197,23 +160,29 @@ const ProfessionalNavbar = () => {
   };
 
   const navLinks = [
-    { path: "/HomePage", name: "HOME", icon: RiHome2Line },
+    { path: "/", name: "HOME", icon: RiHome2Line },
     { path: "/shop", name: "SHOP", icon: RiStore2Line },
     { path: "/contact", name: "CONTACT", icon: RiPhoneLine },
-    { path: "/about", name: "ABOUT", icon: RiInformationLine }
+  ]
+
+  const categories = [
+    { name: "Fashion", path: "/fashion" },
+    { name: "Gift Items", path: "/gift-boxes" },
+    { name: "Books", path: "/books" },
+    { name: "Stationery", path: "/stationery" },
+    { name: "All Products", path: "/shop" },
+
   ];
 
   return (
     <nav
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-        scrolled ? "bg-white shadow-md" : "bg-transparent"
-      }`}
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${scrolled ? "bg-white shadow-md" : "bg-transparent"
+        }`}
     >
       {/* Top Promotional Banner */}
       <div
-        className={`bg-pink-600 text-white py-2 text-center text-xs transition-all duration-300 ${
-          scrolled ? "opacity-0 h-0 overflow-hidden" : "opacity-100 h-auto"
-        }`}
+        className={`bg-pink-600 text-white py-2 text-center text-xs transition-all duration-300 ${scrolled ? "opacity-0 h-0 overflow-hidden" : "opacity-100 h-auto"
+          }`}
       >
         <div className="max-w-[1200px] mx-auto px-4 flex items-center justify-center">
           <RiGift2Line className="mr-2" />
@@ -249,18 +218,35 @@ const ProfessionalNavbar = () => {
             {/* Desktop Navigation Links */}
             <div className="hidden lg:flex items-center justify-center absolute left-1/2 transform -translate-x-1/2">
               {navLinks.map(({ path, name, icon: Icon }) => (
-                <Link
+                <div
                   key={path}
-                  to={path}
-                  className={`px-4 py-2 mx-2 flex items-center ${
-                    isActive(path)
+                  className="relative"
+                  onMouseEnter={name === "SHOP" ? () => setIsShopDropdownOpen(true) : null}
+                  onMouseLeave={name === "SHOP" ? () => setIsShopDropdownOpen(false) : null}
+                >
+                  <button
+                    className={`px-4 py-2 mx-2 flex items-center ${isActive(path)
                       ? "text-pink-600"
                       : "text-gray-800 hover:text-pink-600"
-                  } transition-colors duration-200`}
-                >
-                  <Icon className="w-5 h-5 mr-2" />
-                  {name}
-                </Link>
+                      } transition-colors duration-200`}
+                  >
+                    <Icon className="w-5 h-5 mr-2" />
+                    {name}
+                  </button>
+                  {name === "SHOP" && isShopDropdownOpen && (
+                    <div className="absolute mt-2 bg-white border rounded-lg shadow-lg">
+                      {categories.map((category) => (
+                        <Link
+                          key={category.path}
+                          to={category.path}
+                          className="block px-4 py-2 hover:bg-pink-50"
+                        >
+                          {category.name}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
 
@@ -337,13 +323,7 @@ const ProfessionalNavbar = () => {
                           <RiUserAddLine className="w-4 h-4 mr-2" />
                           Sign Up
                         </Link>
-                        <Link
-                          to='/seller/login'
-                          className="flex items-center px-4 py-2 hover:bg-pink-50 transition"
-                        >
-                          <RiStore2Line className="w-4 h-4 mr-2" />
-                          Seller
-                        </Link>
+                       
                       </>
                     )}
                   </motion.div>
@@ -389,11 +369,10 @@ const ProfessionalNavbar = () => {
                 >
                   <Link
                     to={path}
-                    className={`flex items-center px-6 py-3 ${
-                      isActive(path)
-                        ? "text-pink-600 bg-pink-50"
-                        : "text-gray-800 hover:bg-pink-50 hover:text-pink-600"
-                    } transition-colors duration-200`}
+                    className={`flex items-center px-6 py-3 ${isActive(path)
+                      ? "text-pink-600 bg-pink-50"
+                      : "text-gray-800 hover:bg-pink-50 hover:text-pink-600"
+                      } transition-colors duration-200`}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <Icon className="w-5 h-5 mr-3" />
@@ -433,7 +412,7 @@ const ProfessionalNavbar = () => {
               ref={searchRef}
             >
               <SearchBar />
-              <button 
+              <button
                 onClick={toggleSearch}
                 className="mt-2 text-gray-600 hover:text-pink-600 flex items-center justify-center w-full"
               >
