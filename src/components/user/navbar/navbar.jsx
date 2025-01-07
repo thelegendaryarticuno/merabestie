@@ -160,9 +160,9 @@ const ProfessionalNavbar = () => {
   };
 
   const navLinks = [
-    { path: "/", name: "HOME", icon: RiHome2Line },
+    { path: "/HomePage", name: "HOME", icon: RiHome2Line },
     { path: "/shop", name: "SHOP", icon: RiStore2Line },
-    { path: "/contact", name: "CONTACT", icon: RiPhoneLine },
+    { path: "/Contact", name: "CONTACT", icon: RiPhoneLine },
   ]
 
   const categories = [
